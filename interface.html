@@ -1,0 +1,189 @@
+<html>
+  <body>
+    ☆
+    <style>
+      ♡
+      <script>
+        ♧
+        <py>
+          
+          <!-- ========== VALEURS CORPS HTML ========== -->
+          <div id="forum">
+            <header>
+              <h1>Forum Offline</h1>
+              <span class="status">● En ligne</span>
+            </header>
+            <main id="topics"></main>
+            <footer>
+              <input type="text" id="msg" placeholder="Votre message..." />
+              <button onclick="post()">Envoyer</button>
+            </footer>
+          </div>
+          
+          ☆
+          
+          <!-- ========== VALEURS STYLE CSS ========== -->
+          body { margin:0; font-family:system-ui; background:#0f0f23; color:#e0e0ff; }
+          #forum { display:flex; flex-direction:column; height:100vh; }
+          header { padding:1rem; background:#1a1a3e; border-bottom:2px solid #4a4aff; }
+          .status { color:#00ff88; }
+          main { flex:1; overflow-y:auto; padding:1rem; }
+          .post { background:#1a1a3e; margin:0.5rem 0; padding:1rem; border-radius:8px; }
+          footer { display:flex; gap:0.5rem; padding:1rem; background:#1a1a3e; }
+          input { flex:1; padding:0.75rem; background:#0f0f23; border:1px solid #4a4aff; color:#fff; border-radius:4px; }
+          button { padding:0.75rem 1.5rem; background:#4a4aff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+          
+          ♡
+          
+          <!-- ========== VALEURS SCRIPT JS ========== -->
+          const DB_NAME = 'forum-offline';
+          const STORE = 'messages';
+          
+          async function initDB() {
+            return new Promise((resolve, reject) => {
+              const req = indexedDB.open(DB_NAME, 1);
+              req.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+              };
+              req.onsuccess = (e) => resolve(e.target.result);
+              req.onerror = (e) => reject(e);
+            });
+          }
+          
+          async function post() {
+            const input = document.getElementById('msg');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            const msg = {
+              content,
+              author: 'User',
+              timestamp: Date.now(),
+              synced: false
+            };
+            
+            const db = await initDB();
+            const tx = db.transaction(STORE, 'readwrite');
+            const store = tx.objectStore(STORE);
+            await store.add(msg);
+            
+            render(msg);
+            input.value = '';
+            
+            if (navigator.onLine) syncNow();
+            else showPending();
+          }
+          
+          function render(msg) {
+            const main = document.getElementById('topics');
+            const div = document.createElement('div');
+            div.className = 'post';
+            div.innerHTML = `<strong>${msg.author}</strong> <small>${new Date(msg.timestamp).toLocaleTimeString()}</small><p>${msg.content}</p>`;
+            main.appendChild(div);
+          }
+          
+          async function syncNow() {
+            const db = await initDB();
+            const tx = db.transaction(STORE, 'readonly');
+            const store = tx.objectStore(STORE);
+            const pending = await store.getAll().filter(m => !m.synced);
+            
+            for (const msg of pending) {
+              try {
+                await fetch('/api/messages', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(msg)
+                });
+                msg.synced = true;
+                const updTx = db.transaction(STORE, 'readwrite');
+                updTx.objectStore(STORE).put(msg);
+              } catch (e) {
+                console.log('Sync échoué pour', msg.id);
+              }
+            }
+          }
+          
+          window.addEventListener('online', syncNow);
+          window.addEventListener('offline', showPending);
+          document.addEventListener('DOMContentLoaded', loadMessages);
+          
+          ♧
+          
+          <!-- ========== VALEURS FONCTIONS JSON ========== -->
+          {
+            "config": {
+              "api_endpoint": "/api/messages",
+              "sync_interval": 30000,
+              "max_offline_storage": 1000
+            },
+            "ui": {
+              "theme": "dark",
+              "primary_color": "#4a4aff",
+              "font_size": "16px"
+            }
+          }
+          
+          <!-- ========== VALEURS SYSTEM FUNCTION PY ========== -->
+          # Le backend local (serveur caché)
+          # Ce bloc est extrait et exécuté côté serveur, jamais envoyé au client
+          
+          from http.server import HTTPServer, BaseHTTPRequestHandler
+          import json, sqlite3, os
+          
+          DB_PATH = os.path.expanduser('~/.forum_local/db.sqlite')
+          os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+          
+          conn = sqlite3.connect(DB_PATH)
+          conn.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+              id INTEGER PRIMARY KEY,
+              content TEXT,
+              author TEXT,
+              timestamp REAL,
+              synced INTEGER DEFAULT 1
+            )
+          ''')
+          conn.commit()
+          
+          class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+              if self.path == '/api/messages':
+                length = int(self.headers['Content-Length'])
+                data = json.loads(self.rfile.read(length))
+                conn.execute('INSERT INTO messages (content, author, timestamp) VALUES (?, ?, ?)',
+                           (data['content'], data['author'], data['timestamp']))
+                conn.commit()
+                self.send_response(201)
+                self.end_headers()
+                self.wfile.write(b'{"status":"ok"}')
+            
+            def do_GET(self):
+              if self.path == '/api/messages':
+                cursor = conn.execute('SELECT * FROM messages ORDER BY timestamp DESC LIMIT 50')
+                rows = [dict(zip(['id','content','author','timestamp','synced'], r)) for r in cursor.fetchall()]
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(rows).encode())
+          
+          if __name__ == '__main__':
+            HTTPServer(('127.0.0.1', 8765), Handler).serve_forever()
+          
+          <!-- ========== VALEURS CONNECTEURS ========== -->
+          ☆ → HTML vers CSS (rendu visuel)
+          ♡ → CSS vers JS (interactivité)
+          ♧ → JS vers PY/JSON (données & logique serveur)
+          
+          <!-- ========== VALEURS OUTILS ========== -->
+          # Compilation : cof-compiler source.cof → dist/
+          # - Extrait les blocs entre balises
+          # - Lit les emojis comme points de transition
+          # - Génère : index.html, style.css, app.js, server.py, config.json
+          # - Lance le serveur local Python automatiquement
+          
+        </py>
+      </script>
+    </style>
+  </body>
+</html>
