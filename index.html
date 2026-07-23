@@ -1,189 +1,1306 @@
-<html>
+
+# Création du compilateur COF complet + fichier démo en un seul fichier
+
+cof_complete = '''#!/usr/bin/env python3
+"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         COF COMPILER v1.0 — Poupées Russes                    ║
+║         Compact Object Format : HTML↔CSS↔JS↔JSON↔PY imbriqués              ║
+║                    Connecteurs : ☆ ♡ ♧ (emojis de transition)                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+USAGE:
+    python cof_compiler.py --compile forum.cof
+    python cof_compiler.py --serve        # Lance le serveur local
+    python cof_compiler.py --demo         # Génère le fichier démo
+
+STRUCTURE DU .cof :
+    <html>
+      <body>
+        ☆
+        <style>
+          ♡
+          <script>
+            ♧
+            <py>
+              [HTML] ☆ [CSS] ♡ [JS] ♧ [JSON] [PY]
+            </py>
+          </script>
+        </style>
+      </body>
+    </html>
+"""
+
+import re
+import os
+import sys
+import json
+import argparse
+import subprocess
+from pathlib import Path
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+EMOJI_TRANSITIONS = {
+    '☆': 'html_to_css',      # Corps HTML → Style CSS
+    '♡': 'css_to_js',        # Style CSS → Script JS
+    '♧': 'js_to_pyjson',     # Script JS → Python + JSON
+}
+
+EMOJI_REVERSE = {v: k for k, v in EMOJI_TRANSITIONS.items()}
+
+BALISES = ['html', 'body', 'style', 'script', 'py']
+
+DEMO_SOURCE = """<html>
   <body>
     ☆
     <style>
+      /* ═══════════════════════════════════════════════════════════════ */
+      /*                    VALEURS STYLE CSS                           */
+      /* ═══════════════════════════════════════════════════════════════ */
+      
+      :root {
+        --bg-primary: #0a0a1a;
+        --bg-secondary: #12122e;
+        --bg-card: #1a1a3e;
+        --accent: #6b5ce7;
+        --accent-glow: #8b7cf7;
+        --text-primary: #e8e8ff;
+        --text-secondary: #a0a0cc;
+        --success: #00d4aa;
+        --warning: #ffaa00;
+        --danger: #ff4466;
+        --border: rgba(107, 92, 231, 0.3);
+        --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
+      body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      
+      /* ── Particules d'arrière-plan ── */
+      .particles {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none; z-index: 0; overflow: hidden;
+      }
+      .particle {
+        position: absolute; width: 4px; height: 4px;
+        background: var(--accent); border-radius: 50%;
+        opacity: 0.3; animation: float 15s infinite ease-in-out;
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.6; }
+        90% { opacity: 0.6; }
+        100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+      }
+      
+      /* ── Layout principal ── */
+      #app {
+        position: relative; z-index: 1;
+        max-width: 900px; margin: 0 auto;
+        padding: 2rem 1rem; min-height: 100vh;
+        display: flex; flex-direction: column;
+      }
+      
+      /* ── Header ── */
+      .header {
+        text-align: center; padding: 2rem 0;
+        border-bottom: 2px solid var(--border);
+        margin-bottom: 2rem;
+      }
+      .header h1 {
+        font-size: 2.5rem; font-weight: 800;
+        background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem; letter-spacing: -1px;
+      }
+      .header .subtitle {
+        color: var(--text-secondary); font-size: 1rem;
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      }
+      .pulse {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--success); box-shadow: 0 0 10px var(--success);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+      }
+      .offline .pulse { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+      
+      /* ── Stats bar ── */
+      .stats-bar {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 1rem; margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.25rem; text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(107, 92, 231, 0.2);
+      }
+      .stat-value {
+        font-size: 2rem; font-weight: 700; color: var(--accent-glow);
+      }
+      .stat-label {
+        font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.25rem;
+      }
+      
+      /* ── Zone messages ── */
+      .messages-container {
+        flex: 1; display: flex; flex-direction: column;
+        gap: 1rem; margin-bottom: 2rem;
+      }
+      .message {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.25rem;
+        animation: slideIn 0.4s ease-out;
+        position: relative; overflow: hidden;
+      }
+      .message::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 4px; background: var(--accent); border-radius: 12px 0 0 12px;
+      }
+      .message.pending::before { background: var(--warning); }
+      .message.synced::before { background: var(--success); }
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      .message-header {
+        display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+      }
+      .avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.875rem;
+      }
+      .message-author { font-weight: 600; color: var(--text-primary); }
+      .message-time {
+        font-size: 0.75rem; color: var(--text-secondary);
+        margin-left: auto;
+      }
+      .message-badge {
+        font-size: 0.625rem; padding: 2px 8px; border-radius: 20px;
+        font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      }
+      .badge-pending { background: rgba(255, 170, 0, 0.2); color: var(--warning); }
+      .badge-synced { background: rgba(0, 212, 170, 0.2); color: var(--success); }
+      .message-content { color: var(--text-primary); line-height: 1.6; padding-left: 2.25rem; }
+      .empty-state {
+        text-align: center; padding: 4rem 2rem; color: var(--text-secondary);
+      }
+      .empty-state svg { width: 64px; height: 64px; margin-bottom: 1rem; opacity: 0.5; }
+      
+      /* ── Composer ── */
+      .composer {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 16px; padding: 1rem;
+        display: flex; flex-direction: column; gap: 0.75rem;
+        position: sticky; bottom: 1rem;
+      }
+      .composer-header {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.875rem; color: var(--text-secondary);
+      }
+      .composer-input {
+        background: var(--bg-primary); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1rem; color: var(--text-primary);
+        font-size: 1rem; resize: none; min-height: 80px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      .composer-input:focus {
+        outline: none; border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(107, 92, 231, 0.2);
+      }
+      .composer-actions {
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .char-count { font-size: 0.75rem; color: var(--text-secondary); }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+        color: white; border: none; border-radius: 10px;
+        padding: 0.75rem 2rem; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(107, 92, 231, 0.4);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5; cursor: not-allowed; transform: none;
+        box-shadow: none;
+      }
+      
+      /* ── Toast notifications ── */
+      .toast-container {
+        position: fixed; top: 1rem; right: 1rem; z-index: 1000;
+        display: flex; flex-direction: column; gap: 0.5rem;
+      }
+      .toast {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 10px; padding: 1rem 1.5rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        animation: toastIn 0.3s ease-out;
+        max-width: 320px;
+      }
+      @keyframes toastIn {
+        from { opacity: 0; transform: translateX(100%); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      .toast-icon { font-size: 1.25rem; }
+      .toast-success { border-left: 3px solid var(--success); }
+      .toast-warning { border-left: 3px solid var(--warning); }
+      .toast-error { border-left: 3px solid var(--danger); }
+      
+      /* ── Scrollbar ── */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: var(--bg-primary); }
+      ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+      
+      /* ── Responsive ── */
+      @media (max-width: 600px) {
+        .header h1 { font-size: 1.75rem; }
+        .stats-bar { grid-template-columns: 1fr; }
+        .message-content { padding-left: 0; }
+      }
+      
       ♡
       <script>
-        ♧
-        <py>
-          
-          <!-- ========== VALEURS CORPS HTML ========== -->
-          <div id="forum">
-            <header>
-              <h1>Forum Offline</h1>
-              <span class="status">● En ligne</span>
-            </header>
-            <main id="topics"></main>
-            <footer>
-              <input type="text" id="msg" placeholder="Votre message..." />
-              <button onclick="post()">Envoyer</button>
-            </footer>
-          </div>
-          
-          ☆
-          
-          <!-- ========== VALEURS STYLE CSS ========== -->
-          body { margin:0; font-family:system-ui; background:#0f0f23; color:#e0e0ff; }
-          #forum { display:flex; flex-direction:column; height:100vh; }
-          header { padding:1rem; background:#1a1a3e; border-bottom:2px solid #4a4aff; }
-          .status { color:#00ff88; }
-          main { flex:1; overflow-y:auto; padding:1rem; }
-          .post { background:#1a1a3e; margin:0.5rem 0; padding:1rem; border-radius:8px; }
-          footer { display:flex; gap:0.5rem; padding:1rem; background:#1a1a3e; }
-          input { flex:1; padding:0.75rem; background:#0f0f23; border:1px solid #4a4aff; color:#fff; border-radius:4px; }
-          button { padding:0.75rem 1.5rem; background:#4a4aff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-          
-          ♡
-          
-          <!-- ========== VALEURS SCRIPT JS ========== -->
-          const DB_NAME = 'forum-offline';
-          const STORE = 'messages';
-          
-          async function initDB() {
-            return new Promise((resolve, reject) => {
-              const req = indexedDB.open(DB_NAME, 1);
-              req.onupgradeneeded = (e) => {
-                e.target.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
-              };
-              req.onsuccess = (e) => resolve(e.target.result);
-              req.onerror = (e) => reject(e);
-            });
-          }
-          
-          async function post() {
-            const input = document.getElementById('msg');
-            const content = input.value.trim();
-            if (!content) return;
+        /* ═══════════════════════════════════════════════════════════════ */
+        /*                    VALEURS SCRIPT JS                           */
+        /* ═══════════════════════════════════════════════════════════════ */
+        
+        // ── Configuration ──
+        const CONFIG = {
+          DB_NAME: 'cof-forum-v1',
+          STORE_MESSAGES: 'messages',
+          STORE_META: 'meta',
+          API_ENDPOINT: 'http://127.0.0.1:8765/api',
+          SYNC_INTERVAL: 10000,
+          MAX_MESSAGES: 1000
+        };
+        
+        // ── État global ──
+        const state = {
+          db: null,
+          messages: [],
+          isOnline: navigator.onLine,
+          pendingCount: 0,
+          userName: 'User_' + Math.floor(Math.random() * 9999),
+          isSyncing: false
+        };
+        
+        // ═══════════════════════════════════════════════════════════════
+        // INDEXEDDB — Stockage offline
+        // ═══════════════════════════════════════════════════════════════
+        
+        function initDB() {
+          return new Promise((resolve, reject) => {
+            const request = indexedDB.open(CONFIG.DB_NAME, 1);
             
-            const msg = {
-              content,
-              author: 'User',
-              timestamp: Date.now(),
-              synced: false
+            request.onupgradeneeded = (event) => {
+              const db = event.target.result;
+              if (!db.objectStoreNames.contains(CONFIG.STORE_MESSAGES)) {
+                const store = db.createObjectStore(CONFIG.STORE_MESSAGES, { keyPath: 'id', autoIncrement: true });
+                store.createIndex('synced', 'synced', { unique: false });
+                store.createIndex('timestamp', 'timestamp', { unique: false });
+              }
+              if (!db.objectStoreNames.contains(CONFIG.STORE_META)) {
+                db.createObjectStore(CONFIG.STORE_META, { keyPath: 'key' });
+              }
             };
             
-            const db = await initDB();
-            const tx = db.transaction(STORE, 'readwrite');
-            const store = tx.objectStore(STORE);
-            await store.add(msg);
+            request.onsuccess = (event) => {
+              state.db = event.target.result;
+              resolve(state.db);
+            };
+            request.onerror = (event) => reject(event.target.error);
+          });
+        }
+        
+        function dbAdd(storeName, data) {
+          return new Promise((resolve, reject) => {
+            const tx = state.db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.add(data);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+        
+        function dbGetAll(storeName) {
+          return new Promise((resolve, reject) => {
+            const tx = state.db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+        
+        function dbPut(storeName, data) {
+          return new Promise((resolve, reject) => {
+            const tx = state.db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.put(data);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+        
+        function dbDelete(storeName, id) {
+          return new Promise((resolve, reject) => {
+            const tx = state.db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+          });
+        }
+        
+        function dbGetByIndex(storeName, indexName, value) {
+          return new Promise((resolve, reject) => {
+            const tx = state.db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            const index = store.index(indexName);
+            const request = index.getAll(value);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // UI — Rendu
+        // ═══════════════════════════════════════════════════════════════
+        
+        function createParticles() {
+          const container = document.createElement('div');
+          container.className = 'particles';
+          for (let i = 0; i < 30; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 15 + 's';
+            p.style.animationDuration = (10 + Math.random() * 10) + 's';
+            p.style.width = (2 + Math.random() * 4) + 'px';
+            p.style.height = p.style.width;
+            container.appendChild(p);
+          }
+          document.body.appendChild(container);
+        }
+        
+        function formatTime(timestamp) {
+          const date = new Date(timestamp);
+          const now = new Date();
+          const diff = now - date;
+          if (diff < 60000) return 'À l\\'instant';
+          if (diff < 3600000) return Math.floor(diff / 60000) + ' min';
+          if (diff < 86400000) return Math.floor(diff / 3600000) + ' h';
+          return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        }
+        
+        function renderMessage(msg) {
+          const container = document.getElementById('messages-list');
+          const div = document.createElement('div');
+          div.className = `message ${msg.synced ? 'synced' : 'pending'}`;
+          div.id = `msg-${msg.id || msg.localId}`;
+          div.innerHTML = `
+            <div class="message-header">
+              <div class="avatar">${msg.author.charAt(0).toUpperCase()}</div>
+              <span class="message-author">${msg.author}</span>
+              <span class="message-time">${formatTime(msg.timestamp)}</span>
+              <span class="message-badge ${msg.synced ? 'badge-synced' : 'badge-pending'}">
+                ${msg.synced ? '✓ Sync' : '⏳ Attente'}
+              </span>
+            </div>
+            <div class="message-content">${escapeHtml(msg.content)}</div>
+          `;
+          container.insertBefore(div, container.firstChild);
+        }
+        
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        function updateStats() {
+          const total = state.messages.length;
+          const pending = state.messages.filter(m => !m.synced).length;
+          const synced = total - pending;
+          
+          document.getElementById('stat-total').textContent = total;
+          document.getElementById('stat-pending').textContent = pending;
+          document.getElementById('stat-synced').textContent = synced;
+          
+          const statusEl = document.getElementById('status-text');
+          if (state.isOnline) {
+            statusEl.innerHTML = '<span class="pulse"></span> En ligne — Connecté au serveur local';
+            document.body.classList.remove('offline');
+          } else {
+            statusEl.innerHTML = '<span class="pulse"></span> Hors ligne — Mode local activé';
+            document.body.classList.add('offline');
+          }
+        }
+        
+        function showToast(message, type = 'success') {
+          const container = document.getElementById('toast-container');
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          const icons = { success: '✅', warning: '⚠️', error: '❌', info: 'ℹ️' };
+          toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => toast.remove(), 4000);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // LOGIQUE MÉTIER
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function loadMessages() {
+          const container = document.getElementById('messages-list');
+          container.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <p>Chargement des messages...</p>
+            </div>
+          `;
+          
+          try {
+            // Charge depuis le serveur local si online
+            if (state.isOnline) {
+              const response = await fetch(`${CONFIG.API_ENDPOINT}/messages`);
+              if (response.ok) {
+                const serverMessages = await response.json();
+                // Fusionne avec IndexedDB
+                const localMessages = await dbGetAll(CONFIG.STORE_MESSAGES);
+                const allMessages = [...serverMessages, ...localMessages.filter(lm => !lm.synced)];
+                allMessages.sort((a, b) => b.timestamp - a.timestamp);
+                state.messages = allMessages;
+              }
+            } else {
+              // Mode offline : charge uniquement IndexedDB
+              state.messages = await dbGetAll(CONFIG.STORE_MESSAGES);
+              state.messages.sort((a, b) => b.timestamp - a.timestamp);
+            }
             
-            render(msg);
+            container.innerHTML = '';
+            if (state.messages.length === 0) {
+              container.innerHTML = `
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <p>Aucun message encore. Soyez le premier !</p>
+                </div>
+              `;
+            } else {
+              state.messages.forEach(renderMessage);
+            }
+            
+            updateStats();
+          } catch (err) {
+            console.error('Erreur chargement:', err);
+            showToast('Erreur de chargement des messages', 'error');
+          }
+        }
+        
+        async function sendMessage() {
+          const input = document.getElementById('message-input');
+          const content = input.value.trim();
+          if (!content) return;
+          
+          const btn = document.getElementById('send-btn');
+          btn.disabled = true;
+          
+          const message = {
+            localId: crypto.randomUUID(),
+            content: content,
+            author: state.userName,
+            timestamp: Date.now(),
+            synced: false
+          };
+          
+          try {
+            // Sauvegarde locale immédiate
+            const id = await dbAdd(CONFIG.STORE_MESSAGES, message);
+            message.id = id;
+            state.messages.unshift(message);
+            
+            renderMessage(message);
+            updateStats();
             input.value = '';
+            document.getElementById('char-count').textContent = '0 / 500';
             
-            if (navigator.onLine) syncNow();
-            else showPending();
+            // Essaie d'envoyer au serveur si online
+            if (state.isOnline) {
+              await syncMessage(message);
+            } else {
+              showToast('Message sauvegardé localement — Synchronisation en attente', 'warning');
+            }
+          } catch (err) {
+            console.error('Erreur envoi:', err);
+            showToast('Erreur lors de l\\'envoi', 'error');
+          } finally {
+            btn.disabled = false;
           }
-          
-          function render(msg) {
-            const main = document.getElementById('topics');
-            const div = document.createElement('div');
-            div.className = 'post';
-            div.innerHTML = `<strong>${msg.author}</strong> <small>${new Date(msg.timestamp).toLocaleTimeString()}</small><p>${msg.content}</p>`;
-            main.appendChild(div);
+        }
+        
+        async function syncMessage(msg) {
+          try {
+            const response = await fetch(`${CONFIG.API_ENDPOINT}/messages`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                content: msg.content,
+                author: msg.author,
+                timestamp: msg.timestamp
+              })
+            });
+            
+            if (response.ok) {
+              msg.synced = true;
+              await dbPut(CONFIG.STORE_MESSAGES, msg);
+              
+              // Met à jour l'UI
+              const el = document.getElementById(`msg-${msg.id || msg.localId}`);
+              if (el) {
+                el.classList.remove('pending');
+                el.classList.add('synced');
+                const badge = el.querySelector('.message-badge');
+                if (badge) {
+                  badge.className = 'message-badge badge-synced';
+                  badge.textContent = '✓ Sync';
+                }
+              }
+              
+              updateStats();
+              showToast('Message synchronisé avec le serveur', 'success');
+            }
+          } catch (err) {
+            console.log('Sync échouée pour', msg.localId);
           }
+        }
+        
+        async function syncAllPending() {
+          if (state.isSyncing || !state.isOnline) return;
+          state.isSyncing = true;
           
-          async function syncNow() {
-            const db = await initDB();
-            const tx = db.transaction(STORE, 'readonly');
-            const store = tx.objectStore(STORE);
-            const pending = await store.getAll().filter(m => !m.synced);
+          try {
+            const pending = await dbGetByIndex(CONFIG.STORE_MESSAGES, 'synced', 0);
+            if (pending.length === 0) return;
+            
+            showToast(`Synchronisation de ${pending.length} message(s)...`, 'info');
             
             for (const msg of pending) {
-              try {
-                await fetch('/api/messages', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(msg)
-                });
-                msg.synced = true;
-                const updTx = db.transaction(STORE, 'readwrite');
-                updTx.objectStore(STORE).put(msg);
-              } catch (e) {
-                console.log('Sync échoué pour', msg.id);
-              }
+              await syncMessage(msg);
             }
-          }
-          
-          window.addEventListener('online', syncNow);
-          window.addEventListener('offline', showPending);
-          document.addEventListener('DOMContentLoaded', loadMessages);
-          
-          ♧
-          
-          <!-- ========== VALEURS FONCTIONS JSON ========== -->
-          {
-            "config": {
-              "api_endpoint": "/api/messages",
-              "sync_interval": 30000,
-              "max_offline_storage": 1000
-            },
-            "ui": {
-              "theme": "dark",
-              "primary_color": "#4a4aff",
-              "font_size": "16px"
-            }
-          }
-          
-          <!-- ========== VALEURS SYSTEM FUNCTION PY ========== -->
-          # Le backend local (serveur caché)
-          # Ce bloc est extrait et exécuté côté serveur, jamais envoyé au client
-          
-          from http.server import HTTPServer, BaseHTTPRequestHandler
-          import json, sqlite3, os
-          
-          DB_PATH = os.path.expanduser('~/.forum_local/db.sqlite')
-          os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-          
-          conn = sqlite3.connect(DB_PATH)
-          conn.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
-              id INTEGER PRIMARY KEY,
-              content TEXT,
-              author TEXT,
-              timestamp REAL,
-              synced INTEGER DEFAULT 1
-            )
-          ''')
-          conn.commit()
-          
-          class Handler(BaseHTTPRequestHandler):
-            def do_POST(self):
-              if self.path == '/api/messages':
-                length = int(self.headers['Content-Length'])
-                data = json.loads(self.rfile.read(length))
-                conn.execute('INSERT INTO messages (content, author, timestamp) VALUES (?, ?, ?)',
-                           (data['content'], data['author'], data['timestamp']))
-                conn.commit()
-                self.send_response(201)
-                self.end_headers()
-                self.wfile.write(b'{"status":"ok"}')
             
-            def do_GET(self):
-              if self.path == '/api/messages':
-                cursor = conn.execute('SELECT * FROM messages ORDER BY timestamp DESC LIMIT 50')
-                rows = [dict(zip(['id','content','author','timestamp','synced'], r)) for r in cursor.fetchall()]
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps(rows).encode())
+            updateStats();
+          } finally {
+            state.isSyncing = false;
+          }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // ÉVÉNEMENTS
+        // ═══════════════════════════════════════════════════════════════
+        
+        function setupEvents() {
+          document.getElementById('send-btn').addEventListener('click', sendMessage);
           
-          if __name__ == '__main__':
-            HTTPServer(('127.0.0.1', 8765), Handler).serve_forever()
+          document.getElementById('message-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          });
           
-          <!-- ========== VALEURS CONNECTEURS ========== -->
-          ☆ → HTML vers CSS (rendu visuel)
-          ♡ → CSS vers JS (interactivité)
-          ♧ → JS vers PY/JSON (données & logique serveur)
+          document.getElementById('message-input').addEventListener('input', (e) => {
+            const len = e.target.value.length;
+            document.getElementById('char-count').textContent = `${len} / 500`;
+            if (len > 500) {
+              e.target.value = e.target.value.substring(0, 500);
+            }
+          });
           
-          <!-- ========== VALEURS OUTILS ========== -->
-          # Compilation : cof-compiler source.cof → dist/
-          # - Extrait les blocs entre balises
-          # - Lit les emojis comme points de transition
-          # - Génère : index.html, style.css, app.js, server.py, config.json
-          # - Lance le serveur local Python automatiquement
+          window.addEventListener('online', () => {
+            state.isOnline = true;
+            updateStats();
+            showToast('Connexion rétablie — Synchronisation...', 'success');
+            syncAllPending();
+          });
+          
+          window.addEventListener('offline', () => {
+            state.isOnline = false;
+            updateStats();
+            showToast('Mode hors ligne activé', 'warning');
+          });
+          
+          // Sync périodique
+          setInterval(syncAllPending, CONFIG.SYNC_INTERVAL);
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // INITIALISATION
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function init() {
+          createParticles();
+          await initDB();
+          setupEvents();
+          await loadMessages();
+          
+          if (state.isOnline) {
+            syncAllPending();
+          }
+          
+          console.log('%c🗣️ COF Forum', 'font-size:24px;font-weight:bold;color:#6b5ce7;');
+          console.log('%cMode:', 'font-weight:bold;', state.isOnline ? 'En ligne' : 'Hors ligne');
+          console.log('%cUtilisateur:', 'font-weight:bold;', state.userName);
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+        
+        ♧
+        <py>
+          # ═══════════════════════════════════════════════════════════════
+          #              VALEURS FONCTIONS JSON (Configuration)
+          # ═══════════════════════════════════════════════════════════════
+          
+          {
+            "forum": {
+              "name": "COF Forum Offline",
+              "version": "1.0.0",
+              "max_message_length": 500,
+              "sync_interval_ms": 10000,
+              "features": {
+                "offline_mode": true,
+                "real_time_sync": true,
+                "push_notifications": false,
+                "file_attachments": false
+              }
+            },
+            "server": {
+              "host": "127.0.0.1",
+              "port": 8765,
+              "cors_origins": ["*"],
+              "max_request_size": 1048576
+            },
+            "database": {
+              "engine": "sqlite",
+              "path": "~/.cof_forum/local.db",
+              "max_messages": 10000,
+              "auto_vacuum": true
+            }
+          }
+          
+          # ═══════════════════════════════════════════════════════════════
+          #           VALEURS SYSTEM FUNCTION PY (Serveur Local)
+          # ═══════════════════════════════════════════════════════════════
+          
+          #!/usr/bin/env python3
+          """Serveur local COF Forum — Backend caché"""
+          
+          import os
+          import json
+          import sqlite3
+          import threading
+          from http.server import HTTPServer, BaseHTTPRequestHandler
+          from urllib.parse import urlparse, parse_qs
+          
+          # ── Configuration ──
+          HOST = "127.0.0.1"
+          PORT = 8765
+          DB_DIR = os.path.expanduser("~/.cof_forum")
+          DB_PATH = os.path.join(DB_DIR, "forum.db")
+          
+          # ── Initialisation DB ──
+          os.makedirs(DB_DIR, exist_ok=True)
+          
+          def init_database():
+              conn = sqlite3.connect(DB_PATH)
+              conn.execute("""
+                  CREATE TABLE IF NOT EXISTS messages (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      content TEXT NOT NULL,
+                      author TEXT NOT NULL DEFAULT 'Anonyme',
+                      timestamp REAL NOT NULL,
+                      ip TEXT,
+                      user_agent TEXT,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                  )
+              """)
+              conn.execute("""
+                  CREATE INDEX IF NOT EXISTS idx_timestamp ON messages(timestamp DESC)
+              """)
+              conn.commit()
+              conn.close()
+              print(f"✅ Base de données initialisée : {DB_PATH}")
+          
+          # ── Handler HTTP ──
+          class ForumHandler(BaseHTTPRequestHandler):
+              def log_message(self, format, *args):
+                  # Log silencieux (décommenter pour debug)
+                  # print(f"[{self.log_date_time_string()}] {args[0]}")
+                  pass
+              
+              def _send_json(self, data, status=200):
+                  self.send_response(status)
+                  self.send_header("Content-Type", "application/json")
+                  self.send_header("Access-Control-Allow-Origin", "*")
+                  self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                  self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                  self.end_headers()
+                  self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+              
+              def do_OPTIONS(self):
+                  self.send_response(200)
+                  self.send_header("Access-Control-Allow-Origin", "*")
+                  self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                  self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                  self.end_headers()
+              
+              def do_GET(self):
+                  parsed = urlparse(self.path)
+                  path = parsed.path
+                  
+                  if path == "/api/messages":
+                      try:
+                          conn = sqlite3.connect(DB_PATH)
+                          conn.row_factory = sqlite3.Row
+                          cursor = conn.execute(
+                              "SELECT * FROM messages ORDER BY timestamp DESC LIMIT 50"
+                          )
+                          messages = [dict(row) for row in cursor.fetchall()]
+                          conn.close()
+                          self._send_json({
+                              "status": "ok",
+                              "count": len(messages),
+                              "messages": messages
+                          })
+                      except Exception as e:
+                          self._send_json({"status": "error", "message": str(e)}, 500)
+                  
+                  elif path == "/api/stats":
+                      try:
+                          conn = sqlite3.connect(DB_PATH)
+                          total = conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+                          today = conn.execute(
+                              "SELECT COUNT(*) FROM messages WHERE date(created_at) = date('now')"
+                          ).fetchone()[0]
+                          conn.close()
+                          self._send_json({
+                              "status": "ok",
+                              "total_messages": total,
+                              "today_messages": today,
+                              "server_time": str(datetime.now())
+                          })
+                      except Exception as e:
+                          self._send_json({"status": "error", "message": str(e)}, 500)
+                  
+                  elif path == "/api/health":
+                      self._send_json({
+                          "status": "ok",
+                          "service": "cof-forum-server",
+                          "version": "1.0.0",
+                          "database": DB_PATH,
+                          "online": True
+                      })
+                  
+                  else:
+                      self._send_json({"status": "error", "message": "Not found"}, 404)
+              
+              def do_POST(self):
+                  parsed = urlparse(self.path)
+                  path = parsed.path
+                  
+                  if path == "/api/messages":
+                      try:
+                          content_length = int(self.headers.get('Content-Length', 0))
+                          body = self.rfile.read(content_length).decode('utf-8')
+                          data = json.loads(body)
+                          
+                          content = data.get('content', '').strip()
+                          if not content:
+                              self._send_json({"status": "error", "message": "Content required"}, 400)
+                              return
+                          
+                          conn = sqlite3.connect(DB_PATH)
+                          cursor = conn.execute(
+                              """INSERT INTO messages (content, author, timestamp, ip, user_agent)
+                                 VALUES (?, ?, ?, ?, ?)""",
+                              (
+                                  content[:500],
+                                  data.get('author', 'Anonyme')[:50],
+                                  data.get('timestamp', __import__('time').time()),
+                                  self.client_address[0],
+                                  self.headers.get('User-Agent', '')
+                              )
+                          )
+                          msg_id = cursor.lastrowid
+                          conn.commit()
+                          conn.close()
+                          
+                          self._send_json({
+                              "status": "ok",
+                              "id": msg_id,
+                              "message": "Message enregistré"
+                          }, 201)
+                          
+                      except json.JSONDecodeError:
+                          self._send_json({"status": "error", "message": "Invalid JSON"}, 400)
+                      except Exception as e:
+                          self._send_json({"status": "error", "message": str(e)}, 500)
+                  
+                  else:
+                      self._send_json({"status": "error", "message": "Not found"}, 404)
+          
+          # ── Lancement ──
+          from datetime import datetime
+          
+          def start_server():
+              init_database()
+              server = HTTPServer((HOST, PORT), ForumHandler)
+              print(f"""
+╔══════════════════════════════════════════════════════════════╗
+║           🗣️  COF FORUM SERVER v1.0                           ║
+║                                                              ║
+║   📡 URL API : http://{HOST}:{PORT}/api/messages             ║
+║   💾 Base    : {DB_PATH:<45} ║
+║   🔌 Statut  : En écoute...                                  ║
+║                                                              ║
+║   Routes disponibles :                                       ║
+║   • GET  /api/messages  — Liste les messages                 ║
+║   • POST /api/messages  — Crée un message                    ║
+║   • GET  /api/stats     — Statistiques                       ║
+║   • GET  /api/health    — Vérification santé                 ║
+║                                                              ║
+║   Ctrl+C pour arrêter                                        ║
+╚══════════════════════════════════════════════════════════════╝
+              """)
+              try:
+                  server.serve_forever()
+              except KeyboardInterrupt:
+                  print("\\n👋 Serveur arrêté.")
+                  server.shutdown()
+          
+          if __name__ == "__main__":
+              start_server()
+          
+          # ═══════════════════════════════════════════════════════════════
+          #              VALEURS CONNECTEURS (Documentation)
+          # ═══════════════════════════════════════════════════════════════
+          
+          # ☆ (U+2606) : Transition HTML → CSS
+          #    Marque la fin du corps HTML, début des styles
+          #    Le parser bascule du mode DOM au mode CSS
+          
+          # ♡ (U+2661) : Transition CSS → JS
+          #    Marque la fin des styles, début du script
+          #    Le parser bascule du mode CSS au mode JS
+          
+          # ♧ (U+2667) : Transition JS → PY/JSON
+          #    Marque la fin du script, début données + backend
+          #    Le parser extrait JSON puis Python
+          
+          # ═══════════════════════════════════════════════════════════════
+          #              VALEURS OUTILS (Compilation & Déploiement)
+          # ═══════════════════════════════════════════════════════════════
+          
+          # Commandes du compilateur COF :
+          #
+          # $ python cof_compiler.py --compile forum.cof
+          #   → Extrait les 5 blocs
+          #   → Génère dist/index.html, dist/style.css, dist/app.js
+          #   → Génère dist/server.py, dist/config.json
+          #
+          # $ python cof_compiler.py --serve
+          #   → Lance le serveur Python sur 127.0.0.1:8765
+          #   → Ouvre automatiquement le navigateur
+          #
+          # $ python cof_compiler.py --watch
+          #   → Surveille forum.cof et recompile auto
+          #
+          # $ python cof_compiler.py --bundle
+          #   → Crée un fichier unique minifié pour production
           
         </py>
       </script>
     </style>
   </body>
-</html>
+</html>"""
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMPILATEUR COF
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class COFCompiler:
+    """Compilateur du format COF (Compact Object Format)"""
+    
+    def __init__(self, source_path):
+        self.source_path = Path(source_path)
+        self.source = ""
+        self.blocks = {
+            'html': '',      # Corps HTML
+            'css': '',       # Styles CSS
+            'js': '',        # Script JavaScript
+            'json': '',      # Configuration JSON
+            'py': '',        # Backend Python
+            'connectors': '', # Documentation connecteurs
+            'tools': ''      # Documentation outils
+        }
+    
+    def load(self):
+        """Charge le fichier source .cof"""
+        with open(self.source_path, 'r', encoding='utf-8') as f:
+            self.source = f.read()
+        print(f"📄 Fichier chargé : {self.source_path}")
+        print(f"   Taille : {len(self.source)} caractères")
+        return self
+    
+    def parse(self):
+        """Parse le source et extrait les blocs via les connecteurs emojis"""
+        lines = self.source.split('\n')
+        current_block = 'html'
+        in_py_block = False
+        json_started = False
+        json_buffer = []
+        
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            
+            # Détection des connecteurs emojis
+            if stripped == '☆':
+                current_block = 'css'
+                self.blocks['connectors'] += f"Ligne {i+1}: ☆ → HTML → CSS\\n"
+                continue
+            
+            if stripped == '♡':
+                current_block = 'js'
+                self.blocks['connectors'] += f"Ligne {i+1}: ♡ → CSS → JS\\n"
+                continue
+            
+            if stripped == '♧':
+                current_block = 'py'
+                in_py_block = True
+                self.blocks['connectors'] += f"Ligne {i+1}: ♧ → JS → PY/JSON\\n"
+                continue
+            
+            # Détection des balises (pour le parsing structurel)
+            if '<style>' in stripped and current_block == 'html':
+                current_block = 'css'
+                continue
+            if '<script>' in stripped and current_block == 'css':
+                current_block = 'js'
+                continue
+            if '<py>' in stripped and current_block == 'js':
+                current_block = 'py'
+                in_py_block = True
+                continue
+            
+            # Fermeture des balises
+            if stripped == '</style>' and current_block == 'css':
+                continue
+            if stripped == '</script>' and current_block == 'js':
+                continue
+            if stripped == '</py>' and current_block == 'py':
+                in_py_block = False
+                continue
+            
+            # Détection JSON dans le bloc Python
+            if in_py_block and not json_started:
+                if stripped.startswith('{'):
+                    json_started = True
+                    json_buffer = [line]
+                    continue
+            
+            if json_started:
+                json_buffer.append(line)
+                if stripped.endswith('}'):
+                    # Fin du JSON
+                    json_str = '\\n'.join(json_buffer)
+                    try:
+                        parsed = json.loads(json_str)
+                        self.blocks['json'] = json.dumps(parsed, indent=2, ensure_ascii=False)
+                        json_started = False
+                        json_buffer = []
+                        continue
+                    except json.JSONDecodeError:
+                        pass  # Pas encore complet
+                continue
+            
+            # Détection section outils (commentaires spéciaux)
+            if '# $' in line or '# Commandes' in line:
+                current_block = 'tools'
+            
+            # Ajoute la ligne au bloc courant
+            if current_block in self.blocks:
+                self.blocks[current_block] += line + '\\n'
+        
+        # Nettoyage
+        for key in self.blocks:
+            self.blocks[key] = self.blocks[key].strip()
+        
+        print("\\n📊 Blocs extraits :")
+        for key, value in self.blocks.items():
+            status = "✅" if value else "⚪"
+            print(f"   {status} {key.upper():12} : {len(value)} caractères")
+        
+        return self
+    
+    def compile(self, output_dir='dist'):
+        """Compile les blocs en fichiers de sortie"""
+        out = Path(output_dir)
+        out.mkdir(exist_ok=True)
+        
+        # 1. index.html — Assemble HTML + CSS + JS
+        html_content = f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a1a">
+  <title>COF Forum — Offline First</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+{self.blocks['css']}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <h1>🗣️ COF Forum</h1>
+      <p class="subtitle" id="status-text">
+        <span class="pulse"></span> Chargement...
+      </p>
+    </header>
+    
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Messages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-pending">0</div>
+        <div class="stat-label">En attente</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-synced">0</div>
+        <div class="stat-label">Synchronisés</div>
+      </div>
+    </div>
+    
+    <div class="messages-container" id="messages-list">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>Chargement des messages...</p>
+      </div>
+    </div>
+    
+    <div class="composer">
+      <div class="composer-header">
+        <span>💬</span>
+        <span>Écrire un message</span>
+        <span style="margin-left:auto" id="char-count">0 / 500</span>
+      </div>
+      <textarea class="composer-input" id="message-input" placeholder="Votre message..."></textarea>
+      <div class="composer-actions">
+        <span class="char-count">Appuyez sur Entrée pour envoyer</span>
+        <button class="btn-primary" id="send-btn">Envoyer</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+  
+  <script>
+{self.blocks['js']}
+  </script>
+</body>
+</html>"""
+        
+        with open(out / 'index.html', 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
+        # 2. style.css — Extrait pour référence
+        with open(out / 'style.css', 'w', encoding='utf-8') as f:
+            f.write(self.blocks['css'])
+        
+        # 3. app.js — Extrait pour référence
+        with open(out / 'app.js', 'w', encoding='utf-8') as f:
+            f.write(self.blocks['js'])
+        
+        # 4. server.py — Backend
+        with open(out / 'server.py', 'w', encoding='utf-8') as f:
+            f.write(self.blocks['py'])
+        
+        # 5. config.json — Configuration
+        with open(out / 'config.json', 'w', encoding='utf-8') as f:
+            f.write(self.blocks['json'])
+        
+        # 6. manifest.json — PWA
+        manifest = {
+            "name": "COF Forum Offline",
+            "short_name": "COF Forum",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#0a0a1a",
+            "theme_color": "#6b5ce7",
+            "icons": [
+                {"src": "/icon-72.png", "sizes": "72x72"},
+                {"src": "/icon-192.png", "sizes": "192x192"},
+                {"src": "/icon-512.png", "sizes": "512x512"}
+            ]
+        }
+        with open(out / 'manifest.json', 'w', encoding='utf-8') as f:
+            json.dump(manifest, f, indent=2, ensure_ascii=False)
+        
+        # 7. README.md — Documentation
+        readme = f"""# COF Forum — Compilation Réussie
+
+## Structure générée
+
+```
+dist/
+├── index.html      # Application complète (HTML+CSS+JS)
+├── style.css       # Styles extraits
+├── app.js          # JavaScript extrait
+├── server.py       # Backend Python (serveur local)
+├── config.json     # Configuration JSON
+├── manifest.json   # Manifest PWA
+└── README.md       # Ce fichier
+```
+
+## Démarrage rapide
+
+### 1. Lancer le serveur backend
+```bash
+cd dist
+python server.py
+```
+Le serveur écoute sur `http://127.0.0.1:8765`
+
+### 2. Ouvrir l'application
+Ouvrez `dist/index.html` dans votre navigateur, ou visitez `http://127.0.0.1:8765`
+
+## Connecteurs COF utilisés
+
+{self.blocks['connectors']}
+
+## Fonctionnalités
+
+- ✅ Mode hors ligne (IndexedDB)
+- ✅ Synchronisation auto quand online
+- ✅ Serveur local Python
+- ✅ Interface responsive
+- ✅ Animations fluides
+- ✅ Notifications toast
+"""
+        with open(out / 'README.md', 'w', encoding='utf-8') as f:
+            f.write(readme)
+        
+        print(f"\\n✅ Compilation terminée ! Fichiers générés dans ./{output_dir}/")
+        print(f"   📄 index.html   : {len(html_content)} caractères")
+        print(f"   🎨 style.css    : {len(self.blocks['css'])} caractères")
+        print(f"   ⚡ app.js       : {len(self.blocks['js'])} caractères")
+        print(f"   🐍 server.py    : {len(self.blocks['py'])} caractères")
+        print(f"   ⚙️  config.json  : {len(self.blocks['json'])} caractères")
+        
+        return self
+    
+    def serve(self):
+        """Lance le serveur backend"""
+        import time
+        from datetime import datetime
+        
+        print("\\n🚀 Lancement du serveur COF Forum...")
+        
+        # Exécute le serveur Python
+        server_path = Path('dist') / 'server.py'
+        if server_path.exists():
+            subprocess.run([sys.executable, str(server_path)])
+        else:
+            print("❌ server.py non trouvé. Compilez d'abord avec --compile")
+    
+    def generate_demo(self, output_path='forum.cof'):
+        """Génère le fichier démo .cof"""
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(DEMO_SOURCE)
+        print(f"\\n📝 Fichier démo généré : {output_path}")
+        print(f"   Taille : {len(DEMO_SOURCE)} caractères")
+        return self
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLI
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='COF Compiler — Format Poupées Russes',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Exemples :
+  python cof_compiler.py --demo                # Génère forum.cof
+  python cof_compiler.py --compile forum.cof   # Compile en dist/
+  python cof_compiler.py --serve               # Lance le serveur
+  python cof_compiler.py --demo --compile      # Génère + compile
+        """
+    )
+    parser.add_argument('--demo', action='store_true', help='Génère le fichier démo forum.cof')
+    parser.add_argument('--compile', metavar='FILE', help='Compile un fichier .cof')
+    parser.add_argument('--serve', action='store_true', help='Lance le serveur backend')
+    parser.add_argument('--output', default='dist', help='Répertoire de sortie (défaut: dist)')
+    
+    args = parser.parse_args()
+    
+    if not any([args.demo, args.compile, args.serve]):
+        parser.print_help()
+        print("\\n💡 Essayez : python cof_compiler.py --demo --compile")
+        return
+    
+    if args.demo:
+        compiler = COFCompiler('forum.cof')
+        compiler.generate_demo('forum.cof')
+    
+    if args.compile:
+        compiler = COFCompiler(args.compile)
+        compiler.load().parse().compile(args.output)
+    
+    if args.serve:
+        compiler = COFCompiler('forum.cof')
+        compiler.serve()
+
+
+if __name__ == '__main__':
+    main()
+'''
+
+# Sauvegarde du fichier
+with open('/mnt/agents/output/cof_compiler.py', 'w', encoding='utf-8') as f:
+    f.write(cof_complete)
+
+print(f"✅ Fichier sauvegardé : cof_compiler.py")
+print(f"   Taille : {len(cof_complete)} caractères")
+print(f"   Lignes : {cof_complete.count(chr(10))}")
