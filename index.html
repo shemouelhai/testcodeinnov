@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER S.A.M. - KOF IMBRICATION MATRICE TOTALE</title>
+    <title>SUPER S.A.M. - KOF MATRICE EMBARQUÉE</title>
     <!-- TRANSISTOR-INTERPRÈTE -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const rawData = document.querySelector('coff-matrice-primaire').innerHTML;
 
-            // Extraction et compilation des flux de données KOF (avec le canal tactile)
             const css = [...rawData.matchAll(/🎨-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const html = [...rawData.matchAll(/🔲-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const touchJs = [...rawData.matchAll(/👆-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
 
-            // Injection non-destructive dans le DOM
             if (css.trim() !== '') {
                 document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
             }
@@ -35,10 +33,10 @@
         });
     </script>
 </head>
-<body style="background-color: #000; margin: 0; overflow: hidden; touch-action: manipulation; display: flex; justify-content: center; align-items: center; height: 100vh;">
+<body>
 
     <!-- ================================================================= -->
-    <!-- 1. OUVERTURES DES BALISES (L'Entonnoir KOF - Poupées Russes)      -->
+    <!-- MATRICE KOF EMBARQUÉE                                             -->
     <!-- ================================================================= -->
     <coff-matrice-primaire style="display: none;">
         <golem-motor type="Cognitif" etat="true" polarite="Positive">
@@ -49,12 +47,17 @@
                             <transistor-touch id="T-TOUCH">
                                 <transistor-co id="T-CO">
                                     
-                                    <!-- ================================================================= -->
-                                    <!-- 2. VALEURS COMPILÉES & FLÈCHES DE CONNEXION ALPHANUMÉRIQUES       -->
-                                    <!-- ================================================================= -->
-                                    
-                                    <!-- 🎨 De Langage à Langage (CSS : Style de la bannière logo et des particules multicolores) -->
                                     🎨-c1<co>T-CSS to (
+                                        body {
+                                            background-color: #000;
+                                            margin: 0;
+                                            overflow: hidden;
+                                            touch-action: manipulation;
+                                            display: flex;
+                                            justify-content: center;
+                                            align-items: center;
+                                            height: 100vh;
+                                        }
                                         .banniere-logo {
                                             color: #0FF;
                                             font-family: monospace;
@@ -74,23 +77,43 @@
                                         }
                                     )
                                     
-                                    <!-- 🔲 De Balise à Balise (HTML : Bannière logo interactive) -->
                                     🔲-h1<co>T-CO to (
                                         <div class="banniere-logo">HELLO WORLD</div>
                                     )
 
-                                    <!-- 👆 De Balise à Tactile (Module dédié Touch React / Screen Event) -->
                                     👆-t1<co>T-TOUCH to (
-                                        window.declencherActionTactileTotale = function(e) {
+                                        const KOF_STATE = true;
+                                        window.audioCtx = null;
+
+                                        window.jouerSonPulsatif = function() {
+                                            try {
+                                                if (!window.audioCtx) {
+                                                    window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                                }
+                                                if (window.audioCtx.state === 'suspended') {
+                                                    window.audioCtx.resume();
+                                                }
+                                                const osc = window.audioCtx.createOscillator();
+                                                const gain = window.audioCtx.createGain();
+                                                osc.type = 'sawtooth';
+                                                osc.frequency.setValueAtTime(250 + Math.random() * 750, window.audioCtx.currentTime);
+                                                gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
+                                                gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
+                                                osc.connect(gain);
+                                                gain.connect(window.audioCtx.destination);
+                                                osc.start();
+                                                osc.stop(window.audioCtx.currentTime + 0.3);
+                                            } catch (e) {
+                                                console.log("Audio en attente.");
+                                            }
+                                        };
+
+                                        const declencherActionTotale = function(e) {
                                             let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
                                             let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
                                             
-                                            // Déclenchement immédiat de la sonorité pulsative
-                                            if (typeof window.jouerSonPulsatif === 'function') {
-                                                window.jouerSonPulsatif();
-                                            }
+                                            window.jouerSonPulsatif();
                                             
-                                            // Explosion de feux d'artifice de particules multicolores en continu (true)
                                             const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
                                             for (let i = 0; i < 50; i++) {
                                                 let p = document.createElement('div');
@@ -119,60 +142,20 @@
                                             }
                                         };
 
-                                        // Association des écouteurs tactiles globaux en mode continu (true)
-                                        document.addEventListener('pointerdown', window.declencherActionTactileTotale, { passive: true });
-                                        document.addEventListener('touchstart', window.declencherActionTactileTotale, { passive: true });
+                                        document.addEventListener('pointerdown', declencherActionTotale, { passive: true });
+                                        document.addEventListener('touchstart', declencherActionTotale, { passive: true });
                                     )
 
-                                    <!-- ⚡ De Fonction à Fonction (Python / Node : Logique backend et état continu true) -->
                                     ⚡-p1<co>T-PYTHON to (
                                         /*
-                                        # Node.js / Python Core Backend Simulation
                                         def process_node_stream(event_active=true):
                                             while event_active:
                                                 emit_multideck_pulse()
                                         */
                                         const NODE_STREAM_ACTIVE = true;
-                                        console.log("[SUPER S.A.M. NODE KERNEL] Flux continu initialisé à : " + NODE_STREAM_ACTIVE);
+                                        console.log("[SUPER S.A.M. NODE KERNEL] État : " + NODE_STREAM_ACTIVE);
                                     )
 
-                                    <!-- ⚡ De Balise à Fonction (Audio Sonorité Pulsative continue) -->
-                                    ⚡-j1<co>T-AUDIO to (
-                                        window.audioCtx = null;
-                                        
-                                        window.jouerSonPulsatif = function() {
-                                            if (!window.audioCtx) {
-                                                window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                                            }
-                                            if (window.audioCtx.state === 'suspended') {
-                                                window.audioCtx.resume();
-                                            }
-                                            
-                                            const osc = window.audioCtx.createOscillator();
-                                            const gain = window.audioCtx.createGain();
-                                            
-                                            // Fréquence pulsative multicolore dynamique sans pause
-                                            osc.type = 'sawtooth';
-                                            osc.frequency.setValueAtTime(200 + Math.random() * 800, window.audioCtx.currentTime);
-                                            
-                                            gain.gain.setValueAtTime(0.5, window.audioCtx.currentTime);
-                                            gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
-                                            
-                                            osc.connect(gain);
-                                            gain.connect(window.audioCtx.destination);
-                                            osc.start();
-                                            osc.stop(window.audioCtx.currentTime + 0.3);
-                                        };
-                                    )
-
-                                    <!-- ⚡ De Transistor à Transistor (JS : Orchestration générale) -->
-                                    ⚡-j2<co>T-JS to (
-                                        console.log("[SUPER S.A.M. KOF] Matrice opérationnelle en état true.");
-                                    )
-
-                                <!-- ================================================================= -->
-                                <!-- 3. FERMETURES DES BALISES (Ordre strictement symétrique)          -->
-                                <!-- ================================================================= -->
                                 </transistor-co>
                             </transistor-touch>
                         </jnode-audio>
