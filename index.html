@@ -3,130 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER S.A.M. - Matrice Classique Intégrée</title>
-    <style>
-        body {
-            background-color: #000;
-            margin: 0;
-            overflow: hidden;
-            touch-action: manipulation;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .banniere-logo {
-            color: #0FF;
-            font-family: monospace;
-            font-size: 3.5rem;
-            letter-spacing: 6px;
-            text-shadow: 0 0 15px #0FF, 0 0 30px #0FF, 0 0 45px #FF00FF;
-            user-select: none;
-            z-index: 10;
-            text-align: center;
-            cursor: pointer;
-        }
-        .particule {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99;
-        }
-    </style>
+    <title>SUPER S.A.M. - COFF MATRICE AVEC BOUTON D'ACTIVATION</title>
+    <!-- TRANSISTOR-INTERPRÈTE -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const rawData = document.querySelector('coff-matrice-primaire').innerHTML;
+
+            const css = [...rawData.matchAll(/🎨-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const html = [...rawData.matchAll(/🔲-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const audioJs = [...rawData.matchAll(/🎵-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const touchJs = [...rawData.matchAll(/👆-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+
+            if (css.trim() !== '') {
+                document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
+            }
+            if (html.trim() !== '') {
+                document.body.insertAdjacentHTML('beforeend', html);
+            }
+            if (audioJs.trim() !== '') {
+                const audioScriptNode = document.createElement('script');
+                audioScriptNode.innerHTML = audioJs;
+                document.body.appendChild(audioScriptNode);
+            }
+            if (touchJs.trim() !== '') {
+                const touchScriptNode = document.createElement('script');
+                touchScriptNode.innerHTML = touchJs;
+                document.body.appendChild(touchScriptNode);
+            }
+            if (js.trim() !== '') {
+                const scriptNode = document.createElement('script');
+                scriptNode.innerHTML = js;
+                document.body.appendChild(scriptNode);
+            }
+        });
+    </script>
 </head>
 <body>
 
-    <!-- Bannière logo interactive -->
-    <div class="banniere-logo">HELLO WORLD</div>
+<coff-matrice-primaire style="display: none;">
+    <golem-motor type="Cognitif" etat="true" polarite="Positive">
+        <coff-css id="T-CSS">
+            <coff-js id="T-JS">
+                <python-coff-node id="T-PYTHON">
+                    <jnode-audio id="T-AUDIO">
+                        <transistor-touch id="T-TOUCH">
+                            <transistor-co id="T-CO">
+                                
+                                🎨-c1<co>T-CSS to (
+                                    body {
+                                        background-color: #000;
+                                        margin: 0;
+                                        overflow: hidden;
+                                        touch-action: manipulation;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        height: 100vh;
+                                        gap: 20px;
+                                    }
+                                    .banniere-logo {
+                                        color: #0FF;
+                                        font-family: monospace;
+                                        font-size: 3.5rem;
+                                        letter-spacing: 6px;
+                                        text-shadow: 0 0 15px #0FF, 0 0 30px #0FF, 0 0 45px #FF00FF;
+                                        user-select: none;
+                                        z-index: 10;
+                                        text-align: center;
+                                        cursor: pointer;
+                                    }
+                                    .btn-activation {
+                                        background: rgba(0, 255, 255, 0.1);
+                                        border: 2px solid #0FF;
+                                        color: #0FF;
+                                        padding: 12px 24px;
+                                        font-family: monospace;
+                                        font-size: 1.1rem;
+                                        letter-spacing: 2px;
+                                        border-radius: 8px;
+                                        cursor: pointer;
+                                        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+                                        z-index: 10;
+                                        transition: all 0.2s ease;
+                                    }
+                                    .btn-activation:active {
+                                        background: #0FF;
+                                        color: #000;
+                                    }
+                                    .particule {
+                                        position: absolute;
+                                        border-radius: 50%;
+                                        pointer-events: none;
+                                        z-index: 99;
+                                    }
+                                )
+                                
+                                🔲-h1<co>T-CO to (
+                                    <div class="banniere-logo" id="logo-universe">HELLO UNIVERSE</div>
+                                    <button class="btn-activation" id="btn-react">ACTIVE REACTIONS</button>
+                                )
 
-    <!-- Script d'interaction global (Touch Screen, Audio, Particules, et simulation Node / Python) -->
-    <script>
-        // Logique Backend simulée (Node / Python Core)
-        /*
-        def process_node_stream(event_active=true):
-            while event_active:
-                emit_multideck_pulse()
-        */
-        const NODE_STREAM_ACTIVE = true;
-        console.log("[SUPER S.A.M. NODE KERNEL] État actif : " + NODE_STREAM_ACTIVE);
+                                🎵-a1<co>T-AUDIO to (
+                                    window.audioCtx = null;
 
-        // Contexte Audio pour la sonorité pulsative
-        window.audioCtx = null;
+                                    window.jouerSonPulsatif = function() {
+                                        try {
+                                            if (!window.audioCtx) {
+                                                window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                            }
+                                            if (window.audioCtx.state === 'suspended') {
+                                                window.audioCtx.resume();
+                                            }
+                                            const osc = window.audioCtx.createOscillator();
+                                            const gain = window.audioCtx.createGain();
+                                            
+                                            osc.type = 'sawtooth';
+                                            osc.frequency.setValueAtTime(250 + Math.random() * 750, window.audioCtx.currentTime);
+                                            
+                                            gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
+                                            gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
+                                            
+                                            osc.connect(gain);
+                                            gain.connect(window.audioCtx.destination);
+                                            osc.start();
+                                            osc.stop(window.audioCtx.currentTime + 0.3);
+                                        } catch (e) {
+                                            console.log("Audio en attente.");
+                                        }
+                                    };
+                                )
 
-        window.jouerSonPulsatif = function() {
-            try {
-                if (!window.audioCtx) {
-                    window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (window.audioCtx.state === 'suspended') {
-                    window.audioCtx.resume();
-                }
-                const osc = window.audioCtx.createOscillator();
-                const gain = window.audioCtx.createGain();
-                
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(250 + Math.random() * 750, window.audioCtx.currentTime);
-                
-                gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
-                
-                osc.connect(gain);
-                gain.connect(window.audioCtx.destination);
-                osc.start();
-                osc.stop(window.audioCtx.currentTime + 0.3);
-            } catch (e) {
-                console.log("Audio en attente d'interaction.");
-            }
-        };
+                                👆-t1<co>T-TOUCH to (
+                                    window.declencherActionTotale = function(e) {
+                                        let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
+                                        let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
+                                        
+                                        if (typeof window.jouerSonPulsatif === 'function') {
+                                            window.jouerSonPulsatif();
+                                        }
+                                        
+                                        const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
+                                        for (let i = 0; i < 50; i++) {
+                                            let p = document.createElement('div');
+                                            p.className = 'particule';
+                                            let c = couleursMulticolores[Math.floor(Math.random() * couleursMulticolores.length)];
+                                            p.style.backgroundColor = c;
+                                            p.style.boxShadow = `0 0 15px ${c}, 0 0 30px ${c}`;
+                                            p.style.width = '6px';
+                                            p.style.height = '6px';
+                                            p.style.left = x + 'px';
+                                            p.style.top = y + 'px';
+                                            document.body.appendChild(p);
+                                            
+                                            let angle = Math.random() * Math.PI * 2;
+                                            let force = 80 + Math.random() * 220;
+                                            let tx = Math.cos(angle) * force;
+                                            let ty = Math.sin(angle) * force;
+                                            
+                                            p.animate([
+                                                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                                                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                                            ], {
+                                                duration: 600 + Math.random() * 500,
+                                                easing: 'cubic-bezier(0, .9, .57, 1)'
+                                            }).onfinish = () => p.remove();
+                                        }
+                                    };
 
-        // Déclencheur tactile total (Feux d'artifice de particules multicolores + Son)
-        const declencherActionTotale = function(e) {
-            let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
-            let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
-            
-            // Déclenchement de la sonorité pulsative
-            window.jouerSonPulsatif();
-            
-            // Génération des feux d'artifice visuels
-            const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
-            for (let i = 0; i < 50; i++) {
-                let p = document.createElement('div');
-                p.className = 'particule';
-                let c = couleursMulticolores[Math.floor(Math.random() * couleursMulticolores.length)];
-                p.style.backgroundColor = c;
-                p.style.boxShadow = `0 0 15px ${c}, 0 0 30px ${c}`;
-                p.style.width = '6px';
-                p.style.height = '6px';
-                p.style.left = x + 'px';
-                p.style.top = y + 'px';
-                document.body.appendChild(p);
-                
-                let angle = Math.random() * Math.PI * 2;
-                let force = 80 + Math.random() * 220;
-                let tx = Math.cos(angle) * force;
-                let ty = Math.sin(angle) * force;
-                
-                p.animate([
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                    { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
-                ], {
-                    duration: 600 + Math.random() * 500,
-                    easing: 'cubic-bezier(0, .9, .57, 1)'
-                }).onfinish = () => p.remove();
-            }
-        };
+                                    // Association des écouteurs sur le fond (background), la bannière (logo) et le bouton
+                                    document.addEventListener('pointerdown', window.declencherActionTotale, { passive: true });
+                                    document.addEventListener('touchstart', window.declencherActionTotale, { passive: true });
+                                    
+                                    const logo = document.getElementById('logo-universe');
+                                    const btn = document.getElementById('btn-react');
+                                    
+                                    if (logo) {
+                                        logo.addEventListener('click', (e) => { e.stopPropagation(); window.declencherActionTotale(e); });
+                                    }
+                                    if (btn) {
+                                        btn.addEventListener('click', (e) => { e.stopPropagation(); window.declencherActionTotale(e); });
+                                    }
+                                )
 
-        // Écouteurs d'événements tactiles et pointeur
-        document.addEventListener('pointerdown', declencherActionTotale, { passive: true });
-        document.addEventListener('touchstart', declencherActionTotale, { passive: true });
+                                ⚡-p1<co>T-PYTHON to (
+                                    /*
+                                    def process_node_stream(event_active=true):
+                                        while event_active:
+                                            emit_multideck_pulse()
+                                    */
+                                    const NODE_STREAM_ACTIVE = true;
+                                    console.log("[SUPER S.A.M. COFF NODE KERNEL] État actif : " + NODE_STREAM_ACTIVE);
+                                )
 
-        // Déclencheur automatique initial (True) pour amorcer l'interaction instantanément
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                declencherActionTotale({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 });
-            }, 500);
-        });
-    </script>
+                            </transistor-co>
+                        </transistor-touch>
+                    </jnode-audio>
+                </python-coff-node>
+            </coff-js>
+        </coff-css>
+    </golem-motor>
+</coff-matrice-primaire>
 
 </body>
 </html>
