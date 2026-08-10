@@ -1,9 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SUPER S.A.M. - KOF MULTI-LANGAGES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SUPER S.A.M. - KOF MULTI-LANGAGES CORRIGÉ</title>
     <!-- TRANSISTOR-INTERPRÈTE -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -42,23 +42,26 @@
 
 🔄-c1<co>T-CSS to (body { overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; font-family: 'Courier New', monospace; }) (style-matrice)
 
-▶️-h1<co>T-IN to (<h1 style="color: #0F0; text-shadow: 0 0 15px #0F0, 0 0 30px #0F0; font-size: 6vw; user-select: none; pointer-events: none;">HELLO WORLD</h1>) (html-texte-central)
+▶️-h1<co>T-IN to (<h1 style="color: #0F0; text-shadow: 0 0 15px #0F0, 0 0 30px #0F0; font-size: 6vw; user-select: none; pointer-events: none; text-align: center;">HELLO WORLD</h1>) (html-texte-central)
 
 🔄-c2<co>T-CSS to (.particule-artifice { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }) (style-artifice)
 
 🐍-p1<co>T-PYTHON to (
     # Nœud Python simulé pour l'analyse des logs de Golem Motor
     def analyser_frequence_clic(duree_ms):
-        etat = "INSTINCTIF" if duree_ms <= 50 else "CALCULÉ"
+        etat = "INSTINCTIF" if duree_ms <= 150 else "CALCULÉ"
         print(f"[COFF-PY] Clic {etat} détecté. Délai : {duree_ms}ms")
 ) (logique-python-backend)
 
 ⚡-j1<co>T-AUDIO to (
     // Synthétiseur JNode Audio pour le son pulsatif "Clink"
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioCtx;
     
     window.jouerClink = function(estRapide) {
+        // Initialisation à la volée pour contourner le blocage du navigateur
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         
@@ -68,44 +71,45 @@
         
         // Pulsation avec chute exponentielle (effet clink)
         gain.gain.setValueAtTime(1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2); 
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3); 
         
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
+        osc.stop(audioCtx.currentTime + 0.3);
     };
 ) (moteur-sonore)
 
 ⚡-j2<co>T-JS to (
     let tempsPression = 0;
 
-    // Détection de l'appui
+    // Détection de l'appui (déclenche le chrono)
     document.addEventListener('pointerdown', (e) => {
-        tempsPression = performance.now(); // Mesure précise en millisecondes
+        tempsPression = performance.now();
     });
 
-    // Détection du relâchement et calcul
+    // Détection du relâchement (calcule et exécute)
     document.addEventListener('pointerup', (e) => {
-        const tempsRelachement = performance.now();
-        const dureeMs = tempsRelachement - tempsPression;
-        const estRapide = dureeMs <= 50; // Seuil de 0.05 seconde (50ms)
+        if (tempsPression === 0) return;
+        const dureeMs = performance.now() - tempsPression;
+        const estRapide = dureeMs <= 150; // Seuil ajusté à l'interaction humaine
         
         jouerClink(estRapide);
         declencherFeuArtifice(e.clientX, e.clientY, estRapide);
+        tempsPression = 0;
     });
 
-    // Moteur Visuel
+    // Moteur Visuel Interactif
     window.declencherFeuArtifice = function(x, y, estRapide) {
-        // Couleurs chaudes/vives pour rapide, froides/néons pour lent
         const couleurs = estRapide ? ['#FF0055', '#FFDD00', '#FF5500'] : ['#00FFFF', '#8800FF', '#0044FF'];
         
-        for(let i = 0; i < 45; i++) {
+        for(let i = 0; i < 40; i++) {
             let p = document.createElement('div');
             p.className = 'particule-artifice';
             let couleurChoisie = couleurs[Math.floor(Math.random() * couleurs.length)];
+            
             p.style.backgroundColor = couleurChoisie;
-            p.style.boxShadow = \`0 0 10px \${couleurChoisie}, 0 0 20px \${couleurChoisie}\`;
+            p.style.boxShadow = `0 0 10px ${couleurChoisie}, 0 0 20px ${couleurChoisie}`;
             p.style.left = x + 'px';
             p.style.top = y + 'px';
             document.body.appendChild(p);
@@ -117,7 +121,7 @@
             
             p.animate([
                 { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                { transform: \`translate(\${tx}px, \${ty}px) scale(0)\`, opacity: 0 }
+                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
             ], { 
                 duration: 400 + Math.random() * 600, 
                 easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)' 
