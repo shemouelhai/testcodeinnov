@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SUPER S.A.M. - KOF MULTI-LANGAGES CORRIGÉ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SUPER S.A.M. - KOF IMBRICATION MATRICE</title>
     <!-- TRANSISTOR-INTERPRÈTE -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +13,7 @@
             const html = [...rawData.matchAll(/▶️-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\) \((.*?)\)/g)].map(m => m[1]).join('\n');
             const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\) \((.*?)\)/g)].map(m => m[1]).join('\n');
 
-            document.head.innerHTML += `<style>${css}</style>`;
+            document.head.innerHTML += '<style>' + css + '</style>';
             document.body.innerHTML += html;
             
             const scriptNode = document.createElement('script');
@@ -25,14 +25,14 @@
 <body style="background-color: #000; margin: 0; touch-action: none;">
 
 <!-- ===================================================================== -->
-<!-- 1. OUVERTURES DES TRANSISTORS (L'Entonnoir KOF)                       -->
+<!-- 1. OUVERTURES DES TRANSISTORS (L'Entonnoir KOF - Poupées Russes)      -->
 <!-- ===================================================================== -->
 <coff-matrice-primaire style="display: none;">
 <golem-motor type="Cognitif" etat="Actif" polarite="Positive">
 <kof-css id="T-CSS">
 <kof-js id="T-JS">
-<jnode-audio id="T-AUDIO">
 <python-coff-node id="T-PYTHON">
+<jnode-audio id="T-AUDIO">
 <transistor-in id="T-IN">
 <transistor-out id="T-OUT">
 
@@ -40,103 +40,107 @@
 <!-- 2. VALEURS IMBRIQUÉES (Le Noyau Chaotique et les Flèches)             -->
 <!-- ===================================================================== -->
 
-🔄-c1<co>T-CSS to (body { overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; font-family: 'Courier New', monospace; }) (style-matrice)
+🔄-c1<co>T-CSS to (body { overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; font-family: 'Courier New', monospace; user-select: none; -webkit-user-select: none; }) (style-matrice)
 
-▶️-h1<co>T-IN to (<h1 style="color: #0F0; text-shadow: 0 0 15px #0F0, 0 0 30px #0F0; font-size: 6vw; user-select: none; pointer-events: none; text-align: center;">HELLO WORLD</h1>) (html-texte-central)
+▶️-h1<co>T-IN to (<h1 style="color: #0F0; text-shadow: 0 0 20px #0F0, 0 0 40px #0F0; font-size: 8vw; pointer-events: none; text-align: center;">HELLO WORLD</h1>) (html-texte-central)
 
-🔄-c2<co>T-CSS to (.particule-artifice { position: absolute; width: 6px; height: 6px; border-radius: 50%; pointer-events: none; mix-blend-mode: screen; }) (style-artifice)
+🔄-c2<co>T-CSS to (.particule { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; z-index: 9999; }) (style-artifice)
 
 🐍-p1<co>T-PYTHON to (
-    # Nœud Python simulé pour l'analyse des logs de Golem Motor
-    def analyser_frequence_clic(duree_ms):
-        etat = "INSTINCTIF" if duree_ms <= 150 else "CALCULÉ"
-        print(f"[COFF-PY] Clic {etat} détecté. Délai : {duree_ms}ms")
-) (logique-python-backend)
+    # Logique backend : Temps de réaction du Golem Motor
+    def log_interaction(ms):
+        etat = "INSTINCTIF" if ms <= 150 else "CALCULÉ"
+        print("KOF-PY: Interaction", etat, ms, "ms")
+) (python-analyse)
 
 ⚡-j1<co>T-AUDIO to (
-    // Synthétiseur JNode Audio pour le son pulsatif "Clink"
-    let audioCtx;
+    window.audioCtx = null;
     
     window.jouerClink = function(estRapide) {
-        // Initialisation à la volée pour contourner le blocage du navigateur
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (!window.audioCtx) {
+            window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
         
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const osc = window.audioCtx.createOscillator();
+        const gain = window.audioCtx.createGain();
         
-        // Fréquence aiguë si rapide (1200Hz), grave si lent (600Hz)
         osc.type = estRapide ? 'sine' : 'triangle';
-        osc.frequency.setValueAtTime(estRapide ? 1200 : 600, audioCtx.currentTime); 
+        osc.frequency.setValueAtTime(estRapide ? 1200 : 500, window.audioCtx.currentTime); 
         
-        // Pulsation avec chute exponentielle (effet clink)
-        gain.gain.setValueAtTime(1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3); 
+        gain.gain.setValueAtTime(1, window.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3); 
         
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(window.audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+        osc.stop(window.audioCtx.currentTime + 0.3);
     };
 ) (moteur-sonore)
 
 ⚡-j2<co>T-JS to (
-    let tempsPression = 0;
+    let tPress = 0;
 
-    // Détection de l'appui (déclenche le chrono)
-    document.addEventListener('pointerdown', (e) => {
-        tempsPression = performance.now();
-    });
+    const auContact = function(e) {
+        tPress = performance.now();
+    };
 
-    // Détection du relâchement (calcule et exécute)
-    document.addEventListener('pointerup', (e) => {
-        if (tempsPression === 0) return;
-        const dureeMs = performance.now() - tempsPression;
-        const estRapide = dureeMs <= 150; // Seuil ajusté à l'interaction humaine
+    const auRelachement = function(e) {
+        if (tPress === 0) return;
+        const duree = performance.now() - tPress;
+        const estRapide = duree <= 150;
         
-        jouerClink(estRapide);
-        declencherFeuArtifice(e.clientX, e.clientY, estRapide);
-        tempsPression = 0;
-    });
+        let x = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
+        let y = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
+        
+        window.jouerClink(estRapide);
+        window.genererArtifice(x, y, estRapide);
+        tPress = 0;
+    };
 
-    // Moteur Visuel Interactif
-    window.declencherFeuArtifice = function(x, y, estRapide) {
+    document.addEventListener('mousedown', auContact);
+    document.addEventListener('touchstart', auContact, {passive: true});
+    
+    document.addEventListener('mouseup', auRelachement);
+    document.addEventListener('touchend', auRelachement);
+
+    window.genererArtifice = function(x, y, estRapide) {
         const couleurs = estRapide ? ['#FF0055', '#FFDD00', '#FF5500'] : ['#00FFFF', '#8800FF', '#0044FF'];
         
         for(let i = 0; i < 40; i++) {
             let p = document.createElement('div');
-            p.className = 'particule-artifice';
-            let couleurChoisie = couleurs[Math.floor(Math.random() * couleurs.length)];
+            p.className = 'particule';
+            let c = couleurs[Math.floor(Math.random() * couleurs.length)];
             
-            p.style.backgroundColor = couleurChoisie;
-            p.style.boxShadow = `0 0 10px ${couleurChoisie}, 0 0 20px ${couleurChoisie}`;
+            p.style.backgroundColor = c;
+            p.style.boxShadow = '0 0 12px ' + c;
             p.style.left = x + 'px';
             p.style.top = y + 'px';
             document.body.appendChild(p);
             
             let angle = Math.random() * Math.PI * 2;
-            let force = 40 + Math.random() * 120;
+            let force = 50 + Math.random() * 100;
             let tx = Math.cos(angle) * force;
             let ty = Math.sin(angle) * force;
             
             p.animate([
-                { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+                { transform: 'translate(' + tx + 'px, ' + ty + 'px) scale(0)', opacity: 0 }
             ], { 
                 duration: 400 + Math.random() * 600, 
-                easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)' 
+                easing: 'ease-out' 
             }).onfinish = () => p.remove();
         }
     };
-) (logique-mouvement-et-temps)
+) (moteur-mouvement)
 
 <!-- ===================================================================== -->
-<!-- 3. FERMETURES DES TRANSISTORS (Fermeture de l'Entonnoir)              -->
+<!-- 3. FERMETURES DES TRANSISTORS (Fermeture Logique de l'Entonnoir)      -->
 <!-- ===================================================================== -->
-</transistor-out>
 </transistor-in>
-</python-coff-node>
+</transistor-out>
 </jnode-audio>
+</python-coff-node>
 </kof-js>
 </kof-css>
 </golem-motor>
