@@ -9,9 +9,10 @@
         document.addEventListener("DOMContentLoaded", () => {
             const rawData = document.querySelector('coff-matrice-primaire').innerHTML;
 
-            // Extraction et compilation des flux de données KOF
+            // Extraction et compilation des flux de données KOF (avec le canal tactile)
             const css = [...rawData.matchAll(/🎨-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const html = [...rawData.matchAll(/🔲-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const touchJs = [...rawData.matchAll(/👆-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
 
             // Injection non-destructive dans le DOM
@@ -20,6 +21,11 @@
             }
             if (html.trim() !== '') {
                 document.body.insertAdjacentHTML('beforeend', html);
+            }
+            if (touchJs.trim() !== '') {
+                const touchScriptNode = document.createElement('script');
+                touchScriptNode.innerHTML = touchJs;
+                document.body.appendChild(touchScriptNode);
             }
             if (js.trim() !== '') {
                 const scriptNode = document.createElement('script');
@@ -40,126 +46,135 @@
                 <kof-js id="T-JS">
                     <python-coff-node id="T-PYTHON">
                         <jnode-audio id="T-AUDIO">
-                            <transistor-co id="T-CO">
-                                
-                                <!-- ================================================================= -->
-                                <!-- 2. VALEURS COMPILÉES & FLÈCHES DE CONNEXION ALPHANUMÉRIQUES       -->
-                                <!-- ================================================================= -->
-                                
-                                <!-- 🎨 De Langage à Langage (CSS : Style de la bannière logo et des particules multicolores) -->
-                                🎨-c1<co>T-CSS to (
-                                    .banniere-logo {
-                                        color: #0FF;
-                                        font-family: monospace;
-                                        font-size: 3.5rem;
-                                        letter-spacing: 6px;
-                                        text-shadow: 0 0 15px #0FF, 0 0 30px #0FF, 0 0 45px #FF00FF;
-                                        user-select: none;
-                                        z-index: 10;
-                                        text-align: center;
-                                        cursor: pointer;
-                                    }
-                                    .particule {
-                                        position: absolute;
-                                        border-radius: 50%;
-                                        pointer-events: none;
-                                        z-index: 99;
-                                    }
-                                )
-                                
-                                <!-- 🔲 De Balise à Balise (HTML : Bannière logo interactive) -->
-                                🔲-h1<co>T-CO to (
-                                    <div class="banniere-logo">HELLO WORLD</div>
-                                )
-
-                                <!-- ⚡ De Fonction à Fonction (Python / Node : Logique backend et état continu true) -->
-                                ⚡-p1<co>T-PYTHON to (
-                                    /*
-                                    # Node.js / Python Core Backend Simulation
-                                    def process_node_stream(event_active=true):
-                                        while event_active:
-                                            emit_multideck_pulse()
-                                    */
-                                    const NODE_STREAM_ACTIVE = true;
-                                    console.log("[SUPER S.A.M. NODE KERNEL] Flux continu initialisé à : " + NODE_STREAM_ACTIVE);
-                                )
-
-                                <!-- ⚡ De Balise à Fonction (Audio Sonorité Pulsative continue) -->
-                                ⚡-j1<co>T-AUDIO to (
-                                    window.audioCtx = null;
+                            <transistor-touch id="T-TOUCH">
+                                <transistor-co id="T-CO">
                                     
-                                    window.jouerSonPulsatif = function() {
-                                        if (!window.audioCtx) {
-                                            window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                    <!-- ================================================================= -->
+                                    <!-- 2. VALEURS COMPILÉES & FLÈCHES DE CONNEXION ALPHANUMÉRIQUES       -->
+                                    <!-- ================================================================= -->
+                                    
+                                    <!-- 🎨 De Langage à Langage (CSS : Style de la bannière logo et des particules multicolores) -->
+                                    🎨-c1<co>T-CSS to (
+                                        .banniere-logo {
+                                            color: #0FF;
+                                            font-family: monospace;
+                                            font-size: 3.5rem;
+                                            letter-spacing: 6px;
+                                            text-shadow: 0 0 15px #0FF, 0 0 30px #0FF, 0 0 45px #FF00FF;
+                                            user-select: none;
+                                            z-index: 10;
+                                            text-align: center;
+                                            cursor: pointer;
                                         }
-                                        if (window.audioCtx.state === 'suspended') {
-                                            window.audioCtx.resume();
+                                        .particule {
+                                            position: absolute;
+                                            border-radius: 50%;
+                                            pointer-events: none;
+                                            z-index: 99;
                                         }
-                                        
-                                        const osc = window.audioCtx.createOscillator();
-                                        const gain = window.audioCtx.createGain();
-                                        
-                                        // Fréquence pulsative multicolore dynamique sans pause
-                                        osc.type = 'sawtooth';
-                                        osc.frequency.setValueAtTime(200 + Math.random() * 800, window.audioCtx.currentTime);
-                                        
-                                        gain.gain.setValueAtTime(0.5, window.audioCtx.currentTime);
-                                        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
-                                        
-                                        osc.connect(gain);
-                                        gain.connect(window.audioCtx.destination);
-                                        osc.start();
-                                        osc.stop(window.audioCtx.currentTime + 0.3);
-                                    };
-                                )
+                                    )
+                                    
+                                    <!-- 🔲 De Balise à Balise (HTML : Bannière logo interactive) -->
+                                    🔲-h1<co>T-CO to (
+                                        <div class="banniere-logo">HELLO WORLD</div>
+                                    )
 
-                                <!-- ⚡ De Transistor à Transistor (JS : Moteur d'interaction tactile total sur background et logo, sans aucune pause) -->
-                                ⚡-j2<co>T-JS to (
-                                    const declencherActionTotale = function(e) {
-                                        let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
-                                        let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
-                                        
-                                        // Déclenchement immédiat de la sonorité pulsative
-                                        window.jouerSonPulsatif();
-                                        
-                                        // Explosion de feux d'artifice de particules multicolores en continu
-                                        const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
-                                        for (let i = 0; i < 50; i++) {
-                                            let p = document.createElement('div');
-                                            p.className = 'particule';
-                                            let c = couleursMulticolores[Math.floor(Math.random() * couleursMulticolores.length)];
-                                            p.style.backgroundColor = c;
-                                            p.style.boxShadow = `0 0 15px ${c}, 0 0 30px ${c}`;
-                                            p.style.width = '6px';
-                                            p.style.height = '6px';
-                                            p.style.left = x + 'px';
-                                            p.style.top = y + 'px';
-                                            document.body.appendChild(p);
+                                    <!-- 👆 De Balise à Tactile (Module dédié Touch React / Screen Event) -->
+                                    👆-t1<co>T-TOUCH to (
+                                        window.declencherActionTactileTotale = function(e) {
+                                            let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
+                                            let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
                                             
-                                            let angle = Math.random() * Math.PI * 2;
-                                            let force = 80 + Math.random() * 220;
-                                            let tx = Math.cos(angle) * force;
-                                            let ty = Math.sin(angle) * force;
+                                            // Déclenchement immédiat de la sonorité pulsative
+                                            if (typeof window.jouerSonPulsatif === 'function') {
+                                                window.jouerSonPulsatif();
+                                            }
                                             
-                                            p.animate([
-                                                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                                                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
-                                            ], {
-                                                duration: 600 + Math.random() * 500,
-                                                easing: 'cubic-bezier(0, .9, .57, 1)'
-                                            }).onfinish = () => p.remove();
-                                        }
-                                    };
+                                            // Explosion de feux d'artifice de particules multicolores en continu (true)
+                                            const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
+                                            for (let i = 0; i < 50; i++) {
+                                                let p = document.createElement('div');
+                                                p.className = 'particule';
+                                                let c = couleursMulticolores[Math.floor(Math.random() * couleursMulticolores.length)];
+                                                p.style.backgroundColor = c;
+                                                p.style.boxShadow = `0 0 15px ${c}, 0 0 30px ${c}`;
+                                                p.style.width = '6px';
+                                                p.style.height = '6px';
+                                                p.style.left = x + 'px';
+                                                p.style.top = y + 'px';
+                                                document.body.appendChild(p);
+                                                
+                                                let angle = Math.random() * Math.PI * 2;
+                                                let force = 80 + Math.random() * 220;
+                                                let tx = Math.cos(angle) * force;
+                                                let ty = Math.sin(angle) * force;
+                                                
+                                                p.animate([
+                                                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                                                    { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                                                ], {
+                                                    duration: 600 + Math.random() * 500,
+                                                    easing: 'cubic-bezier(0, .9, .57, 1)'
+                                                }).onfinish = () => p.remove();
+                                            }
+                                        };
 
-                                    // Écouteurs globaux sur le background et le logo (Tactile, Souris, Touch Screen, true)
-                                    document.addEventListener('pointerdown', declencherActionTotale, { passive: true });
-                                    document.addEventListener('touchstart', declencherActionTotale, { passive: true });
-                                )
+                                        // Association des écouteurs tactiles globaux en mode continu (true)
+                                        document.addEventListener('pointerdown', window.declencherActionTactileTotale, { passive: true });
+                                        document.addEventListener('touchstart', window.declencherActionTactileTotale, { passive: true });
+                                    )
 
-                            <!-- ================================================================= -->
-                            <!-- 3. FERMETURES DES BALISES (Ordre strictement symétrique)          -->
-                            <!-- ================================================================= -->
-                            </transistor-co>
+                                    <!-- ⚡ De Fonction à Fonction (Python / Node : Logique backend et état continu true) -->
+                                    ⚡-p1<co>T-PYTHON to (
+                                        /*
+                                        # Node.js / Python Core Backend Simulation
+                                        def process_node_stream(event_active=true):
+                                            while event_active:
+                                                emit_multideck_pulse()
+                                        */
+                                        const NODE_STREAM_ACTIVE = true;
+                                        console.log("[SUPER S.A.M. NODE KERNEL] Flux continu initialisé à : " + NODE_STREAM_ACTIVE);
+                                    )
+
+                                    <!-- ⚡ De Balise à Fonction (Audio Sonorité Pulsative continue) -->
+                                    ⚡-j1<co>T-AUDIO to (
+                                        window.audioCtx = null;
+                                        
+                                        window.jouerSonPulsatif = function() {
+                                            if (!window.audioCtx) {
+                                                window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                            }
+                                            if (window.audioCtx.state === 'suspended') {
+                                                window.audioCtx.resume();
+                                            }
+                                            
+                                            const osc = window.audioCtx.createOscillator();
+                                            const gain = window.audioCtx.createGain();
+                                            
+                                            // Fréquence pulsative multicolore dynamique sans pause
+                                            osc.type = 'sawtooth';
+                                            osc.frequency.setValueAtTime(200 + Math.random() * 800, window.audioCtx.currentTime);
+                                            
+                                            gain.gain.setValueAtTime(0.5, window.audioCtx.currentTime);
+                                            gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
+                                            
+                                            osc.connect(gain);
+                                            gain.connect(window.audioCtx.destination);
+                                            osc.start();
+                                            osc.stop(window.audioCtx.currentTime + 0.3);
+                                        };
+                                    )
+
+                                    <!-- ⚡ De Transistor à Transistor (JS : Orchestration générale) -->
+                                    ⚡-j2<co>T-JS to (
+                                        console.log("[SUPER S.A.M. KOF] Matrice opérationnelle en état true.");
+                                    )
+
+                                <!-- ================================================================= -->
+                                <!-- 3. FERMETURES DES BALISES (Ordre strictement symétrique)          -->
+                                <!-- ================================================================= -->
+                                </transistor-co>
+                            </transistor-touch>
                         </jnode-audio>
                     </python-coff-node>
                 </kof-js>
