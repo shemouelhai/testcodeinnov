@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COFF MATRICE PRIMAIRE - SUPER S.A.M - GOLEM MOTOR</title>
+    <style>
+        /* === ENVIRONNEMENT VISUEL === */
+        body {
+            background-color: #000000;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #FFFFFF;
+            text-shadow: 0 0 5px #00FF00;
+        }
+
+        /* === DÉFINITION DE L'IMBRICATION (KOF ARCHITECTURE) === */
+        /* Représentation visuelle de l'interpénétration des nœuds (Symbole ∪ / ∩) */
+        .kof-wrapper {
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .imbrication-niveau {
+            border-left: 2px dashed #00FF00;
+            padding-left: 20px;
+            margin-top: 10px;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .system-log {
+            font-size: 0.8em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- /// COFF MATRICE PRIMAIRE - SUPER S.A.M. /// -->
+    <!-- /// INGÉNIEUR SYSTÈME : SAMUEL /// -->
+    <!-- /// CONCEPT : CODE PERSONNALISÉ HTML TOUT EMBARQUÉ /// -->
+
+    <div class="kof-wrapper" id="coff-core-wrapper">
+        <h1 id="hello-texte">HELLO WORLD</h1>
+        <div class="system-log">/// INIT: Architecture KOF - Nœuds Imbriqués ///</div>
+
+        <!-- ========================================== -->
+        <!-- ZONE DE DÉPLOIEMENT : GOLEM MOTOR          -->
+        <!-- ========================================== -->
+        
+        <!-- NŒUD RACINE : GOLEM MOTOR (Type Principal) -->
+        <golem-motor type="Cognitif" etat="Actif" polarite="Positive">
+            <div class="imbrication-niveau">
+                
+                <!-- SOUS-NŒUD 1 : Types, États et Polarités croisés -->
+                <golem-motor type="Materiel" etat="Stable" polarite="Neutre">
+                    <div class="imbrication-niveau">
+                        <golem-motor type="Virtuel" etat="Veille" polarite="Negative">
+                            <div class="system-log">/// Interpénétration des polarités validée ///</div>
+                        </golem-motor>
+                    </div>
+                </golem-motor>
+
+                <!-- ========================================== -->
+                <!-- ZONE D'ANOMALIE & RÉGÉNÉRATION             -->
+                <!-- ========================================== -->
+                
+                <div class="imbrication-niveau">
+                    <!-- BALISE FANTÔME (Maintenant correctement fermée) -->
+                    <!-- L'imbrication connecte la balise fantôme directement au régénérateur -->
+                    <balise-fantome-entrante id="node-06" etat="Erreur">
+                        <div class="system-log">/// ALERTE : Balise Fantôme Isolée ///</div>
+                    </balise-fantome-entrante>
+                    
+                    <!-- INTERVENTION REGENERATOR -->
+                    <!-- Il s'imbrique autour de l'anomalie pour la traiter -->
+                    <regenerator-node action="Purge-et-Reset-Terminés" cible="node-06">
+                        <div class="system-log">/// R-99>00 : Re-câblage automatique des portes logiques ///</div>
+                    </regenerator-node>
+                </div>
+
+            </div>
+        </golem-motor>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT EMBARQUÉ : MOTEUR LOGIQUE       -->
+    <!-- ========================================== -->
+    <script>
+        /// DÉFINITION DES CUSTOM ELEMENTS HTML
+        /// Cette section explique au navigateur comment interpréter vos balises personnalisées
+        /// sans déclencher l'erreur "Balise non identifiée dans le maillage".
+
+        // 1. Classe pour le Golem Motor
+        class GolemMotor extends HTMLElement {
+            connectedCallback() {
+                const type = this.getAttribute('type') || 'Non-Défini';
+                const etat = this.getAttribute('etat') || 'Non-Défini';
+                const polarite = this.getAttribute('polarite') || 'Non-Défini';
+                
+                // Vérification de l'interpénétration
+                console.log(`[GOLEM MOTOR] Imbrication validée -> Type: ${type} | État: ${etat} | Polarité: ${polarite}`);
+            }
+        }
+        
+        // 2. Classe pour la Balise Fantôme
+        class BaliseFantomeEntrante extends HTMLElement {
+            connectedCallback() {
+                console.log(`[BALISE FANTÔME] Détectée et scellée dans le maillage HTML.`);
+            }
+        }
+
+        // 3. Classe pour le Regenerator
+        class RegeneratorNode extends HTMLElement {
+            connectedCallback() {
+                const action = this.getAttribute('action');
+                console.log(`[REGENERATOR] Cycle exécuté : ${action}`);
+                
+                // Logique visuelle de régénération
+                this.style.border = "1px solid #FF9900";
+                this.style.display = "block";
+                this.style.padding = "5px";
+                this.style.marginTop = "10px";
+            }
+        }
+
+        /// ENREGISTREMENT DANS LE DOM
+        /// (Le navigateur reconnaît désormais ces balises comme natives)
+        customElements.define('golem-motor', GolemMotor);
+        customElements.define('balise-fantome-entrante', BaliseFantomeEntrante);
+        customElements.define('regenerator-node', RegeneratorNode);
+
+        /// ANIMATION / PULSATION (Optionnel - Miroir Sonore / Visuel)
+        setTimeout(() => {
+            document.getElementById('hello-texte').style.color = "#00FF00";
+        }, 1000);
+    </script>
+</body>
+</html>
