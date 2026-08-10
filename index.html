@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER S.A.M. - KOF MATRICE EMBARQUÉE</title>
+    <title>SUPER S.A.M. - KOF MATRICE COMPLÈTE</title>
     <!-- TRANSISTOR-INTERPRÈTE -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -11,6 +11,7 @@
 
             const css = [...rawData.matchAll(/🎨-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const html = [...rawData.matchAll(/🔲-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            const audioJs = [...rawData.matchAll(/🎵-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const touchJs = [...rawData.matchAll(/👆-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
             const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
 
@@ -19,6 +20,11 @@
             }
             if (html.trim() !== '') {
                 document.body.insertAdjacentHTML('beforeend', html);
+            }
+            if (audioJs.trim() !== '') {
+                const audioScriptNode = document.createElement('script');
+                audioScriptNode.innerHTML = audioJs;
+                document.body.appendChild(audioScriptNode);
             }
             if (touchJs.trim() !== '') {
                 const touchScriptNode = document.createElement('script');
@@ -36,7 +42,7 @@
 <body>
 
     <!-- ================================================================= -->
-    <!-- MATRICE KOF EMBARQUÉE                                             -->
+    <!-- MATRICE KOF EMBARQUÉE AVEC VALEURS AUDIO ET VISUELLES COMPLÈTES    -->
     <!-- ================================================================= -->
     <coff-matrice-primaire style="display: none;">
         <golem-motor type="Cognitif" etat="true" polarite="Positive">
@@ -47,6 +53,7 @@
                             <transistor-touch id="T-TOUCH">
                                 <transistor-co id="T-CO">
                                     
+                                    <!-- VALEURS VISUELLES (CSS) -->
                                     🎨-c1<co>T-CSS to (
                                         body {
                                             background-color: #000;
@@ -77,12 +84,13 @@
                                         }
                                     )
                                     
+                                    <!-- VALEURS STRUCTURELLES (HTML) -->
                                     🔲-h1<co>T-CO to (
                                         <div class="banniere-logo">HELLO WORLD</div>
                                     )
 
-                                    👆-t1<co>T-TOUCH to (
-                                        const KOF_STATE = true;
+                                    <!-- VALEURS AUDIO (Générateur de son pulsatif) -->
+                                    🎵-a1<co>T-AUDIO to (
                                         window.audioCtx = null;
 
                                         window.jouerSonPulsatif = function() {
@@ -95,25 +103,35 @@
                                                 }
                                                 const osc = window.audioCtx.createOscillator();
                                                 const gain = window.audioCtx.createGain();
+                                                
                                                 osc.type = 'sawtooth';
                                                 osc.frequency.setValueAtTime(250 + Math.random() * 750, window.audioCtx.currentTime);
+                                                
                                                 gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
                                                 gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.3);
+                                                
                                                 osc.connect(gain);
                                                 gain.connect(window.audioCtx.destination);
                                                 osc.start();
                                                 osc.stop(window.audioCtx.currentTime + 0.3);
                                             } catch (e) {
-                                                console.log("Audio en attente.");
+                                                console.log("Audio en attente d'interaction.");
                                             }
                                         };
+                                    )
 
+                                    <!-- VALEURS TACTILES & ANIMATION VISUELLE (Feux d'artifice / Particules multicolores) -->
+                                    👆-t1<co>T-TOUCH to (
                                         const declencherActionTotale = function(e) {
                                             let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
                                             let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
                                             
-                                            window.jouerSonPulsatif();
+                                            // Déclenchement de la valeur audio pulsative
+                                            if (typeof window.jouerSonPulsatif === 'function') {
+                                                window.jouerSonPulsatif();
+                                            }
                                             
+                                            // Génération des valeurs visuelles (Feux d'artifice et particules multicolores)
                                             const couleursMulticolores = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FF5500', '#FFFFFF'];
                                             for (let i = 0; i < 50; i++) {
                                                 let p = document.createElement('div');
@@ -146,6 +164,7 @@
                                         document.addEventListener('touchstart', declencherActionTotale, { passive: true });
                                     )
 
+                                    <!-- VALEURS LOGIQUES KERNEL (Python / Node) -->
                                     ⚡-p1<co>T-PYTHON to (
                                         /*
                                         def process_node_stream(event_active=true):
@@ -153,7 +172,7 @@
                                                 emit_multideck_pulse()
                                         */
                                         const NODE_STREAM_ACTIVE = true;
-                                        console.log("[SUPER S.A.M. NODE KERNEL] État : " + NODE_STREAM_ACTIVE);
+                                        console.log("[SUPER S.A.M. NODE KERNEL] État actif : " + NODE_STREAM_ACTIVE);
                                     )
 
                                 </transistor-co>
