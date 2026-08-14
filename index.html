@@ -1,39 +1,65 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPER S.A.M. - COFF MATRICE AVEC BOUTON D'ACTIVATION</title>
+    <title>SUPER S.A.M. - COFF MATRICE AVEC CONNECTEURS XML</title>
     <!-- TRANSISTOR-INTERPRÈTE -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const rawData = document.querySelector('coff-matrice-primaire').innerHTML;
+            const template = document.getElementById('coff-source');
+            if (!template) return;
+            const rawData = template.innerHTML;
 
-            const css = [...rawData.matchAll(/🎨-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
-            const html = [...rawData.matchAll(/🔲-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
-            const audioJs = [...rawData.matchAll(/🎵-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
-            const touchJs = [...rawData.matchAll(/👆-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
-            const js = [...rawData.matchAll(/⚡-[a-z0-9]+<co>[A-Z-]+ to \(([\s\S]*?)\)/g)].map(m => m[1]).join('\n');
+            // Fonction d'extraction générique par préfixe d'Emoji ID
+            const extractNode = (emoji) => {
+                const regex = new RegExp(`<co\\s+[^>]*id=["']${emoji}-[^"']+["'][^>]*target=["'][^"']+["'][^>]*>([\\s\\S]*?)<\\/co>`, 'gi');
+                return [...rawData.matchAll(regex)].map(m => {
+                    let content = m[1].trim();
+                    // Nettoyage optionnel des délimiteurs [[ ]] si présents
+                    if (content.startsWith('[[') && content.endsWith(']]')) {
+                        content = content.slice(2, -2);
+                    }
+                    return content;
+                }).join('\n');
+            };
 
+            const css = extractNode('🎨');
+            const html = extractNode('🔲');
+            const audioJs = extractNode('🎵');
+            const touchJs = extractNode('👆');
+            const js = extractNode('⚡');
+
+            // 1. Injection CSS
             if (css.trim() !== '') {
-                document.head.insertAdjacentHTML('beforeend', '<style>' + css + '</style>');
+                const styleNode = document.createElement('style');
+                styleNode.textContent = css;
+                document.head.appendChild(styleNode);
             }
+
+            // 2. Injection HTML
             if (html.trim() !== '') {
                 document.body.insertAdjacentHTML('beforeend', html);
             }
+
+            // 3. Exécution Audio JNode
             if (audioJs.trim() !== '') {
                 const audioScriptNode = document.createElement('script');
-                audioScriptNode.innerHTML = audioJs;
+                audioScriptNode.textContent = audioJs;
                 document.body.appendChild(audioScriptNode);
             }
+
+            // 4. Exécution Transistor Touch
             if (touchJs.trim() !== '') {
                 const touchScriptNode = document.createElement('script');
-                touchScriptNode.innerHTML = touchJs;
+                touchScriptNode.textContent = touchJs;
                 document.body.appendChild(touchScriptNode);
             }
+
+            // 5. Exécution Python-JS Node
             if (js.trim() !== '') {
                 const scriptNode = document.createElement('script');
-                scriptNode.innerHTML = js;
+                scriptNode.textContent = js;
                 document.body.appendChild(scriptNode);
             }
         });
@@ -41,7 +67,8 @@
 </head>
 <body>
 
-<coff-matrice-primaire style="display: none;">
+<template id="coff-source">
+<coff-matrice-primaire>
     <golem-motor type="Cognitif" etat="true" polarite="Positive">
         <coff-css id="T-CSS">
             <coff-js id="T-JS">
@@ -50,7 +77,7 @@
                         <transistor-touch id="T-TOUCH">
                             <transistor-co id="T-CO">
                                 
-                                🎨-c1<co>T-CSS to (
+                                <co id="🎨-c1" target="T-CSS">[[
                                     body {
                                         background-color: #000;
                                         margin: 0;
@@ -98,14 +125,14 @@
                                         pointer-events: none;
                                         z-index: 99;
                                     }
-                                )
+                                ]]</co>
                                 
-                                🔲-h1<co>T-CO to (
+                                <co id="🔲-h1" target="T-CO">[[
                                     <div class="banniere-logo" id="logo-universe">HELLO UNIVERSE</div>
                                     <button class="btn-activation" id="btn-react">ACTIVE REACTIONS</button>
-                                )
+                                ]]</co>
 
-                                🎵-a1<co>T-AUDIO to (
+                                <co id="🎵-a1" target="T-AUDIO">[[
                                     window.audioCtx = null;
 
                                     window.jouerSonPulsatif = function() {
@@ -133,9 +160,9 @@
                                             console.log("Audio en attente.");
                                         }
                                     };
-                                )
+                                ]]</co>
 
-                                👆-t1<co>T-TOUCH to (
+                                <co id="👆-t1" target="T-TOUCH">[[
                                     window.declencherActionTotale = function(e) {
                                         let x = e.clientX || (e.touches && e.touches[0].clientX) || (e.changedTouches && e.changedTouches[0].clientX) || window.innerWidth / 2;
                                         let y = e.clientY || (e.touches && e.touches[0].clientY) || (e.changedTouches && e.changedTouches[0].clientY) || window.innerHeight / 2;
@@ -172,30 +199,20 @@
                                         }
                                     };
 
-                                    // Association des écouteurs sur le fond (background), la bannière (logo) et le bouton
-                                    document.addEventListener('pointerdown', window.declencherActionTotale, { passive: true });
-                                    document.addEventListener('touchstart', window.declencherActionTotale, { passive: true });
-                                    
-                                    const logo = document.getElementById('logo-universe');
-                                    const btn = document.getElementById('btn-react');
-                                    
-                                    if (logo) {
-                                        logo.addEventListener('click', (e) => { e.stopPropagation(); window.declencherActionTotale(e); });
-                                    }
-                                    if (btn) {
-                                        btn.addEventListener('click', (e) => { e.stopPropagation(); window.declencherActionTotale(e); });
-                                    }
-                                )
+                                    document.addEventListener('pointerdown', (e) => {
+                                        window.declencherActionTotale(e);
+                                    });
+                                ]]</co>
 
-                                ⚡-p1<co>T-PYTHON to (
+                                <co id="⚡-p1" target="T-PYTHON">[[
                                     /*
-                                    def process_node_stream(event_active=true):
+                                    def process_node_stream(event_active=True):
                                         while event_active:
                                             emit_multideck_pulse()
                                     */
                                     const NODE_STREAM_ACTIVE = true;
-                                    console.log("[SUPER S.A.M. COFF NODE KERNEL] État actif : " + NODE_STREAM_ACTIVE);
-                                )
+                                    console.log("[SUPER S.A.M. COFF NODE KERNEL] Connecteur validé : " + NODE_STREAM_ACTIVE);
+                                ]]</co>
 
                             </transistor-co>
                         </transistor-touch>
@@ -205,6 +222,8 @@
         </coff-css>
     </golem-motor>
 </coff-matrice-primaire>
+</template>
 
 </body>
 </html>
+
