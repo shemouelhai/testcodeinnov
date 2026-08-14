@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SUPER S.A.M. - COFF MATRICE AVEC GOLEMOTOR</title>
+  <title>SUPER S.A.M. - GOLEMOTOR BOOST PWA & STREAM MATRIX</title>
 
-  <!-- TRANSISTOR-INTERPRÈTE & PONT GOLEMOTOR -->
+  <!-- TRANSISTOR-INTERPRÈTE -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const source = document.getElementById('coff-matrix-source');
@@ -13,7 +13,6 @@
 
       const raw = source.textContent;
 
-      // Parseur universel agnostique d'attributs pour <co>
       const extractNode = (emoji) => {
         const regex = /<co\b([^>]*)>([\s\S]*?)<\/co>/gi;
         let output = [];
@@ -39,33 +38,24 @@
       const touchJs = extractNode('👆');
       const pythonJs = extractNode('⚡');
 
-      // 1. Injection Style
       if (css) {
-        const style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
+        const s = document.createElement('style');
+        s.textContent = css;
+        document.head.appendChild(s);
       }
-
-      // 2. Injection Rendu HTML
       if (html) {
         document.body.insertAdjacentHTML('beforeend', html);
       }
-
-      // 3. Noyau Audio Polyphonique (JNode)
       if (audioJs) {
         const s = document.createElement('script');
         s.textContent = audioJs;
         document.body.appendChild(s);
       }
-
-      // 4. Noyau Logique GoleMotor (Types, Polarités & REZ Engine)
       if (pythonJs) {
         const s = document.createElement('script');
         s.textContent = pythonJs;
         document.body.appendChild(s);
       }
-
-      // 5. Noyau Tactile & Particules (Transistor Touch)
       if (touchJs) {
         const s = document.createElement('script');
         s.textContent = touchJs;
@@ -76,10 +66,10 @@
 </head>
 <body>
 
-<!-- MATRICE COFF NATIVE (FLUX BRUT GÉRÉ PAR GOLEMOTOR) -->
+<!-- MATRICE COFF NATIVE DU BOOSTER -->
 <script type="text/coff-matrix" id="coff-matrix-source">
 <coff-matrice-primaire>
-  <golem-motor type="Cognitif" etat="true" polarite="Positive">
+  <golem-motor type="Stream-Booster" polarite="Positive" mode="PWA-System-Bridge">
     <coff-css id="T-CSS">
       <coff-js id="T-JS">
         <python-coff-node id="T-PYTHON">
@@ -88,345 +78,395 @@
               <transistor-co id="T-CO">
 
 <co id="🎨-c1" target="T-CSS">[[
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background-color: #050508;
-    margin: 0;
-    padding: 12px;
-    overflow: hidden;
-    touch-action: manipulation;
+    background-color: #030408;
+    color: #E0F0FF;
+    font-family: 'Segoe UI', monospace, system-ui;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
-    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
     gap: 16px;
     user-select: none;
-    -webkit-user-select: none;
-    font-family: monospace;
+    overflow-x: hidden;
   }
 
-  .banniere-logo {
-    color: #00FFFF;
-    font-size: clamp(1.6rem, 5vw, 2.8rem);
-    letter-spacing: 4px;
-    text-shadow: 0 0 15px #00FFFF, 0 0 30px #00FFFF, 0 0 50px #FF00FF;
-    cursor: pointer;
+  .header-panel {
     text-align: center;
-    z-index: 10;
-    transition: transform 0.1s ease;
-  }
-  .banniere-logo:active {
-    transform: scale(0.96);
-  }
-
-  /* HUD Moniteur GoleMotor */
-  .golemotor-hud {
-    background: rgba(10, 15, 25, 0.85);
-    border: 1px solid rgba(0, 255, 255, 0.3);
-    border-radius: 10px;
-    padding: 12px 18px;
     display: flex;
     flex-direction: column;
+    gap: 4px;
+  }
+  .tag {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: #00FFCC;
+  }
+  .title {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: 6px;
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+  }
+
+  /* Viewport Vidéo / Stream Filtré */
+  .viewport-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border: 2px solid rgba(0, 255, 204, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+  }
+  #stream-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .stream-overlay-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00FFCC;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #00FFCC;
+    backdrop-filter: blur(4px);
+  }
+  .stream-fps-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #FF0077;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    color: #FF0077;
+    font-weight: bold;
+  }
+
+  /* Commandes & Filtres */
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     width: 100%;
-    max-width: 420px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    z-index: 10;
+    max-width: 480px;
   }
-  .hud-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    color: #A0C0D0;
-  }
-  .hud-val {
-    font-weight: bold;
-    color: #00FFFF;
-    text-shadow: 0 0 8px #00FFFF;
-  }
-  .hud-val.active { color: #00FF66; text-shadow: 0 0 8px #00FF66; }
-  .hud-val.passive { color: #FFCC00; text-shadow: 0 0 8px #FFCC00; }
-  .hud-val.dormant { color: #CC66FF; text-shadow: 0 0 8px #CC66FF; }
-  .hud-val.zombie { color: #FF3366; text-shadow: 0 0 8px #FF3366; }
-
-  /* Boutons d'appel direct GoleMotor */
-  .actions-grid {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 420px;
-    z-index: 10;
-  }
-  .btn-action {
-    flex: 1;
-    background: rgba(0, 255, 255, 0.08);
-    border: 1px solid #00FFFF;
-    color: #00FFFF;
-    padding: 12px 8px;
+  .btn-filter {
+    background: rgba(10, 20, 35, 0.8);
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    color: #A0D0F0;
+    padding: 10px 12px;
+    font-size: 0.8rem;
     font-family: monospace;
-    font-size: 0.85rem;
     letter-spacing: 1px;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
     transition: all 0.2s ease;
     text-align: center;
   }
-  .btn-action:hover {
-    background: rgba(0, 255, 255, 0.25);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-  }
-  .btn-action:active {
-    background: #00FFFF;
-    color: #000;
+  .btn-filter.active {
+    background: rgba(0, 255, 204, 0.25);
+    border-color: #00FFCC;
+    color: #FFFFFF;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
   }
 
-  .particule {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 99;
+  /* Moniteur de Télémétrie PWA */
+  .telemetry-panel {
+    background: rgba(8, 12, 22, 0.85);
+    border: 1px solid rgba(0, 255, 204, 0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+  .telemetry-row {
+    display: flex;
+    justify-content: space-between;
+  }
+  .val-active { color: #00FF66; font-weight: bold; }
+  .val-passive { color: #FFCC00; font-weight: bold; }
+  .val-cyber { color: #00FFFF; font-weight: bold; }
+
+  /* Notification Toast Broadcast */
+  .pwa-toast {
+    background: rgba(0, 255, 204, 0.15);
+    border: 1px solid #00FFCC;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: #E0FFFF;
+    text-align: center;
+    width: 100%;
+    max-width: 480px;
   }
 ]]</co>
 
 <co id="🔲-h1" target="T-CO">[[
-  <div class="banniere-logo" id="logo-universe" onclick="window.GoleMotor.call('PULSE_HARMONIC')">HELLO UNIVERSE</div>
-
-  <div class="golemotor-hud" id="golemotor-monitor">
-    <div class="hud-row"><span>GOLEMOTOR ENGINE:</span><span class="hud-val active">ONLINE</span></div>
-    <div class="hud-row"><span>DERNIER APPEL:</span><span class="hud-val" id="hud-last-call">STANDBY</span></div>
-    <div class="hud-row"><span>POLARITÉ:</span><span class="hud-val" id="hud-polarity">+ POSITIVE</span></div>
-    <div class="hud-row"><span>FLUX TYPE / ÉTAT:</span><span class="hud-val active" id="hud-state">APP :: ACTIVE</span></div>
+  <div class="header-panel">
+    <div class="tag">GOLEMOTOR // STREAM & PWA ACCELERATOR</div>
+    <h1 class="title">MATRIX BOOST</h1>
   </div>
 
-  <div class="actions-grid">
-    <button class="btn-action" onclick="window.GoleMotor.call('REZ_FLASH')">⚡ REZ FLASH</button>
-    <button class="btn-action" onclick="window.GoleMotor.call('CYCLE_PURGE')">🌀 MUTATION</button>
-    <button class="btn-action" onclick="window.GoleMotor.call('PURGE_ZOMBIE')">🔴 PURGE 0%</button>
+  <div class="viewport-container">
+    <canvas id="stream-canvas" width="640" height="360"></canvas>
+    <div class="stream-overlay-badge" id="filter-badge">FILTRE : HDR CLARITY</div>
+    <div class="stream-fps-badge" id="fps-badge">60 FPS</div>
+  </div>
+
+  <div class="filters-grid">
+    <button class="btn-filter active" onclick="window.GoleStream.setFilter('HDR')">✦ HDR BOOST</button>
+    <button class="btn-filter" onclick="window.GoleStream.setFilter('CYBER')">⚡ CYBER SHARP</button>
+    <button class="btn-filter" onclick="window.GoleStream.setFilter('BLOOM')">✨ MATRIX BLOOM</button>
+    <button class="btn-filter" onclick="window.GoleStream.setFilter('RAW')">⤬ RAW STREAM</button>
+  </div>
+
+  <div class="telemetry-panel">
+    <div class="telemetry-row"><span>ÉTAT DU NOYAU :</span><span id="telemetry-state" class="val-active">ACTIF (+ EXPANSION)</span></div>
+    <div class="telemetry-row"><span>BUS PWA SYSTÈME :</span><span id="telemetry-pwa" class="val-cyber">CROSS-APP BROADCAST ÉVEILLÉ</span></div>
+    <div class="telemetry-row"><span>CHARGE GPU / FILTRE :</span><span id="telemetry-load" class="val-cyber">0.8 ms / frame</span></div>
+  </div>
+
+  <div class="pwa-toast" id="pwa-toast-msg">
+    📡 Connecté au bus système inter-apps. Changez d'onglet pour observer le passage en mode Passif (~).
   </div>
 ]]</co>
 
 <co id="🎵-a1" target="T-AUDIO">[[
   window.audioCtx = null;
 
-  window.jouerSonPulsatif = function(frequenceBase = 220, typeOnde = 'sawtooth') {
+  window.jouerSonBoost = function(type = 'filter') {
     try {
-      if (!window.audioCtx) {
-        window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (window.audioCtx.state === 'suspended') {
-        window.audioCtx.resume();
-      }
+      if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
 
       const now = window.audioCtx.currentTime;
-      const duree = 0.4;
-      const masterGain = window.audioCtx.createGain();
+      const osc = window.audioCtx.createOscillator();
+      const gain = window.audioCtx.createGain();
 
-      masterGain.gain.setValueAtTime(0.22, now);
-      masterGain.gain.exponentialRampToValueAtTime(0.0001, now + duree);
-      masterGain.connect(window.audioCtx.destination);
+      if (type === 'filter') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(1040, now + 0.15);
+      } else {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.2);
+      }
 
-      // Tri-oscillateur polyphonique
-      [1.0, 1.25, 1.50].forEach((ratio, idx) => {
-        const osc = window.audioCtx.createOscillator();
-        osc.type = typeOnde;
-        osc.frequency.setValueAtTime(frequenceBase * ratio, now);
-        osc.detune.setValueAtTime((Math.random() - 0.5) * 10, now);
-        osc.connect(masterGain);
-        osc.start(now);
-        osc.stop(now + duree);
-      });
-    } catch (e) {
-      console.warn("[AUDIO COFF] Standby :", e);
-    }
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+      osc.connect(gain);
+      gain.connect(window.audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } catch(e) {}
   };
 ]]</co>
 
 <co id="⚡-p1" target="T-PYTHON">[[
   /*
   =============================================================================
-   GOLEMOTOR KERNEL NATIVE JAVASCRIPT / PYTHON COFF BRIDGE
+   GOLEMOTOR STREAM ENGINE & PWA SYSTEM BUS
   =============================================================================
   */
 
-  const EntityType = {
-    APP: "APP",
-    GAME: "GAME",
-    VIDEO: "VIDEO",
-    IMAGE: "IMAGE",
-    AUDIO: "AUDIO",
-    FOLDER: "FOLDER",
-    FILE: "FILE",
-    NOTE: "NOTE",
-    SEED: "COFF_SEED"
-  };
-
-  const Polarity = {
-    POSITIVE: "+ POSITIVE",   // Expansion / Rendu / Paste
-    NEGATIVE: "- NÉGATIVE",   // Compression / Purge / Suppr
-    ABSTRACT: "~ ABSTRAITE"   // Mutation de type en cours de purge
-  };
-
-  const DataState = {
-    ACTIVE: "ACTIVE (In-Use)",
-    PASSIVE: "PASSIVE (Background)",
-    DORMANT: "DORMANT (Mattern Buffer)",
-    ZOMBIE: "ZOMBIE (Cold 0% RAM)"
-  };
-
-  class GoleMotorRuntime {
+  class GoleStreamEngine {
     constructor() {
-      this.currentType = EntityType.APP;
-      this.currentState = DataState.ACTIVE;
-      this.currentPolarity = Polarity.POSITIVE;
-      this.memoryEntities = new Map();
-      this.initDefaultEntities();
+      this.canvas = document.getElementById('stream-canvas');
+      this.ctx = this.canvas ? this.canvas.getContext('2d', { willReadFrequently: true }) : null;
+      this.activeFilter = 'HDR';
+      this.state = 'ACTIVE'; // ACTIVE (+), PASSIVE (~), DORMANT (-)
+      this.fps = 60;
+      this.frameTime = 0;
+      this.animTime = 0;
+      this.bus = new BroadcastChannel('golemotor_system_bus');
+
+      this.initPwaSystemBridge();
+      this.startStreamLoop();
     }
 
-    initDefaultEntities() {
-      this.register("UNIVERSE_CORE", EntityType.APP, "<co id='🔲-h1'>[[ core ]]</co>");
-    }
+    // 1. PONT PWA & INFLUENCE SYSTÈME INTER-APPS
+    initPwaSystemBridge() {
+      // Écoute des messages venant d'autres applications/onglets connectés
+      this.bus.onmessage = (event) => {
+        const { source, action, filter } = event.data;
+        const toast = document.getElementById('pwa-toast-msg');
+        if (toast) {
+          toast.textContent = `📡 [Bus Externe] Signal reçu de ${source} : ${action}`;
+        }
+        if (action === 'SYNC_FILTER' && filter) {
+          this.setFilter(filter, false);
+        }
+      };
 
-    register(id, type, matternSeed) {
-      this.memoryEntities.set(id, {
-        id: id,
-        originalType: type,
-        currentType: type,
-        state: DataState.ACTIVE,
-        polarity: Polarity.POSITIVE,
-        seed: matternSeed,
-        ramAllocated: 64
+      // Détection automatique de visibilité (Passage Actif ↔ Passif)
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          this.state = 'PASSIVE';
+          this.fps = 15; // Économie drastique des calculs en arrière-plan
+          this.updateTelemetry('PASSIF (~ REDUCTION)', 'val-passive');
+          this.bus.postMessage({ source: 'PWA_TAB_1', action: 'STATE_CHANGED', state: 'PASSIVE' });
+        } else {
+          this.state = 'ACTIVE';
+          this.fps = 60; // Restitution pleine puissance
+          this.updateTelemetry('ACTIF (+ EXPANSION)', 'val-active');
+          this.bus.postMessage({ source: 'PWA_TAB_1', action: 'STATE_CHANGED', state: 'ACTIVE' });
+        }
       });
     }
 
-    // POINT D'ENTRÉE PRINCIPAL APPELABLE PAR LE HTML
-    call(action, payload = {}) {
-      console.log(`⚡ [GoleMotor.call] Ordre reçu du HTML : ${action}`);
-      const lastCallLabel = document.getElementById('hud-last-call');
-      const polarityLabel = document.getElementById('hud-polarity');
-      const stateLabel = document.getElementById('hud-state');
-
-      if (lastCallLabel) lastCallLabel.textContent = action;
-
-      switch(action) {
-        case 'REZ_FLASH':
-          // REZ from Zombie vers Actif (Polarité Positive)
-          this.currentPolarity = Polarity.POSITIVE;
-          this.currentState = DataState.ACTIVE;
-          this.currentType = EntityType.GAME;
-          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(440, 'sawtooth');
-          break;
-
-        case 'CYCLE_PURGE':
-          // Mutation polymorphe vers Passif / Dormant (Polarité Abstraite)
-          this.currentPolarity = Polarity.ABSTRACT;
-          if (this.currentType === EntityType.GAME) {
-            this.currentType = EntityType.VIDEO;
-            this.currentState = DataState.PASSIVE;
-          } else if (this.currentType === EntityType.VIDEO) {
-            this.currentType = EntityType.NOTE;
-            this.currentState = DataState.DORMANT;
-            this.currentPolarity = Polarity.NEGATIVE;
-          } else {
-            this.currentType = EntityType.APP;
-            this.currentState = DataState.ACTIVE;
-            this.currentPolarity = Polarity.POSITIVE;
-          }
-          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(330, 'triangle');
-          break;
-
-        case 'PURGE_ZOMBIE':
-          // Purge totale (Suppr) : RAM = 0, Pointeur seul (Polarité Négative)
-          this.currentPolarity = Polarity.NEGATIVE;
-          this.currentState = DataState.ZOMBIE;
-          this.currentType = EntityType.SEED;
-          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(140, 'sine');
-          break;
-
-        case 'PULSE_HARMONIC':
-        default:
-          this.currentPolarity = Polarity.POSITIVE;
-          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(260 + Math.random() * 200, 'sawtooth');
-          break;
+    updateTelemetry(stateText, stateClass) {
+      const stateEl = document.getElementById('telemetry-state');
+      if (stateEl) {
+        stateEl.textContent = stateText;
+        stateEl.className = stateClass;
       }
+    }
 
-      // Mise à jour de l'affichage HUD
-      if (polarityLabel) polarityLabel.textContent = this.currentPolarity;
-      if (stateLabel) {
-        stateLabel.textContent = `${this.currentType} :: ${this.currentState}`;
-        stateLabel.className = 'hud-val ' + (
-          this.currentState.includes('ACTIVE') ? 'active' :
-          this.currentState.includes('PASSIVE') ? 'passive' :
-          this.currentState.includes('DORMANT') ? 'dormant' : 'zombie'
-        );
+    setFilter(filterName, broadcast = true) {
+      this.activeFilter = filterName;
+      const badge = document.getElementById('filter-badge');
+      if (badge) badge.textContent = `FILTRE : ${filterName} BOOST`;
+
+      document.querySelectorAll('.btn-filter').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(filterName));
+      });
+
+      if (typeof window.jouerSonBoost === 'function') window.jouerSonBoost('filter');
+
+      // Diffusion de la modification aux autres applications via le bus PWA
+      if (broadcast) {
+        this.bus.postMessage({ source: 'PWA_STREAM_MASTER', action: 'SYNC_FILTER', filter: filterName });
       }
+    }
 
-      // Déclenchement de particules au clic sur l'action
-      if (typeof window.declencherParticules === 'function') {
-        window.declencherParticules();
-      }
+    // 2. MOTEUR DE GÉNÉRATION & DE FILTRAGE DU FLUX
+    startStreamLoop() {
+      let lastTimestamp = performance.now();
 
-      return {
-        action: action,
-        type: this.currentType,
-        state: this.currentState,
-        polarity: this.currentPolarity
+      const render = (now) => {
+        const delta = now - lastTimestamp;
+        const targetInterval = 1000 / this.fps;
+
+        if (delta >= targetInterval) {
+          lastTimestamp = now - (delta % targetInterval);
+          this.renderProceduralStream();
+          this.applyMatrixFilter();
+
+          // Mesure du FPS
+          const fpsEl = document.getElementById('fps-badge');
+          if (fpsEl) fpsEl.textContent = `${Math.round(1000 / delta)} FPS`;
+        }
+
+        requestAnimationFrame(render);
       };
+
+      requestAnimationFrame(render);
+    }
+
+    // Rendu du flux source procédural (Simulation vidéo / caméra)
+    renderProceduralStream() {
+      if (!this.ctx) return;
+      const w = this.canvas.width;
+      const h = this.canvas.height;
+      this.animTime += 0.03;
+
+      // Fond cybernétique avec grille dynamique
+      const grad = this.ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#050B18');
+      grad.addColorStop(1, '#1A0028');
+      this.ctx.fillStyle = grad;
+      this.ctx.fillRect(0, 0, w, h);
+
+      // Sphère d'onde centrale
+      const cx = w / 2 + Math.cos(this.animTime) * 80;
+      const cy = h / 2 + Math.sin(this.animTime * 1.5) * 40;
+
+      const radial = this.ctx.createRadialGradient(cx, cy, 10, cx, cy, 120);
+      radial.addColorStop(0, '#00FFE0');
+      radial.addColorStop(0.5, '#7000FF');
+      radial.addColorStop(1, 'transparent');
+
+      this.ctx.fillStyle = radial;
+      this.ctx.beginPath();
+      this.ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // Application des filtres matriciels par pixel
+    applyMatrixFilter() {
+      if (!this.ctx || this.activeFilter === 'RAW') return;
+
+      const t0 = performance.now();
+      const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+      const d = imgData.data;
+      const len = d.length;
+
+      if (this.activeFilter === 'HDR') {
+        // Boost de contraste, saturation et clarté dynamique
+        for (let i = 0; i < len; i += 4) {
+          d[i] = Math.min(255, d[i] * 1.25 + 5);         // R
+          d[i + 1] = Math.min(255, d[i + 1] * 1.3 + 10); // G
+          d[i + 2] = Math.min(255, d[i + 2] * 1.4 + 20); // B
+        }
+      } else if (this.activeFilter === 'CYBER') {
+        // Filtre Cyberpunk haute netteté (Teinte cyan/magenta renforcée)
+        for (let i = 0; i < len; i += 4) {
+          let lum = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          d[i] = Math.min(255, d[i] * 1.4 + (lum > 128 ? 40 : 0));
+          d[i + 1] = Math.min(255, d[i + 1] * 0.9);
+          d[i + 2] = Math.min(255, d[i + 2] * 1.6);
+        }
+      } else if (this.activeFilter === 'BLOOM') {
+        // Seuil d'hyper-luminance luminescente
+        for (let i = 0; i < len; i += 4) {
+          let maxVal = Math.max(d[i], d[i + 1], d[i + 2]);
+          if (maxVal > 160) {
+            d[i] = 255;
+            d[i + 1] = Math.min(255, d[i + 1] * 1.3);
+            d[i + 2] = 255;
+          }
+        }
+      }
+
+      this.ctx.putImageData(imgData, 0, 0);
+
+      const t1 = performance.now();
+      const loadEl = document.getElementById('telemetry-load');
+      if (loadEl) loadEl.textContent = `${(t1 - t0).toFixed(2)} ms / frame`;
     }
   }
 
-  // Instanciation de l'objet global
-  window.GoleMotor = new GoleMotorRuntime();
-  console.log("[SUPER S.A.M. KERNEL] GoleMotor est prêt et raccordé à window.GoleMotor.");
+  window.GoleStream = new GoleStreamEngine();
 ]]</co>
 
 <co id="👆-t1" target="T-TOUCH">[[
-  window.declencherParticules = function(x, y) {
-    if (x === undefined || y === undefined) {
-      x = window.innerWidth / 2;
-      y = window.innerHeight / 2;
-    }
-
-    const palette = ['#00FFFF', '#FF00FF', '#00FF66', '#FFCC00', '#FFFFFF'];
-    for (let i = 0; i < 35; i++) {
-      const p = document.createElement('div');
-      p.className = 'particule';
-      const c = palette[Math.floor(Math.random() * palette.length)];
-      p.style.backgroundColor = c;
-      p.style.boxShadow = `0 0 12px ${c}, 0 0 24px ${c}`;
-      p.style.width = '5px';
-      p.style.height = '5px';
-      p.style.left = x + 'px';
-      p.style.top = y + 'px';
-      document.body.appendChild(p);
-
-      const angle = Math.random() * Math.PI * 2;
-      const force = 50 + Math.random() * 160;
-      const tx = Math.cos(angle) * force;
-      const ty = Math.sin(angle) * force;
-
-      p.animate([
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
-      ], {
-        duration: 400 + Math.random() * 300,
-        easing: 'cubic-bezier(0, .9, .57, 1)'
-      }).onfinish = () => p.remove();
-    }
-  };
-
-  // Clic sur l'arrière-plan global
-  window.addEventListener('pointerdown', (e) => {
-    if (!e.target.closest('.actions-grid') && !e.target.closest('.golemotor-hud') && !e.target.closest('.banniere-logo')) {
-      window.GoleMotor.call('PULSE_HARMONIC');
-      window.declencherParticules(e.clientX, e.clientY);
-    }
-  });
+  // Ajustement interactif des fréquences de filtrage au toucher sur le canvas
+  const canvas = document.getElementById('stream-canvas');
+  if (canvas) {
+    canvas.addEventListener('pointerdown', (e) => {
+      if (typeof window.jouerSonBoost === 'function') window.jouerSonBoost('pulse');
+    });
+  }
 ]]</co>
 
               </transistor-co>
