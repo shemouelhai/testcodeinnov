@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SUPER S.A.M. - COFF MATRICE AVEC GOLEMOTOR</title>
+
+  <!-- TRANSISTOR-INTERPRÈTE & PONT GOLEMOTOR -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const source = document.getElementById('coff-matrix-source');
+      if (!source) return;
+
+      const raw = source.textContent;
+
+      // Parseur universel agnostique d'attributs pour <co>
+      const extractNode = (emoji) => {
+        const regex = /<co\b([^>]*)>([\s\S]*?)<\/co>/gi;
+        let output = [];
+        let match;
+
+        while ((match = regex.exec(raw)) !== null) {
+          const attrs = match[1];
+          let body = match[2].trim();
+
+          if (new RegExp(`id=["']${emoji}-[^"']+["']`, 'i').test(attrs)) {
+            if (body.startsWith('[[') && body.endsWith(']]')) {
+              body = body.slice(2, -2).trim();
+            }
+            output.push(body);
+          }
+        }
+        return output.join('\n');
+      };
+
+      const css = extractNode('🎨');
+      const html = extractNode('🔲');
+      const audioJs = extractNode('🎵');
+      const touchJs = extractNode('👆');
+      const pythonJs = extractNode('⚡');
+
+      // 1. Injection Style
+      if (css) {
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+      }
+
+      // 2. Injection Rendu HTML
+      if (html) {
+        document.body.insertAdjacentHTML('beforeend', html);
+      }
+
+      // 3. Noyau Audio Polyphonique (JNode)
+      if (audioJs) {
+        const s = document.createElement('script');
+        s.textContent = audioJs;
+        document.body.appendChild(s);
+      }
+
+      // 4. Noyau Logique GoleMotor (Types, Polarités & REZ Engine)
+      if (pythonJs) {
+        const s = document.createElement('script');
+        s.textContent = pythonJs;
+        document.body.appendChild(s);
+      }
+
+      // 5. Noyau Tactile & Particules (Transistor Touch)
+      if (touchJs) {
+        const s = document.createElement('script');
+        s.textContent = touchJs;
+        document.body.appendChild(s);
+      }
+    });
+  </script>
+</head>
+<body>
+
+<!-- MATRICE COFF NATIVE (FLUX BRUT GÉRÉ PAR GOLEMOTOR) -->
+<script type="text/coff-matrix" id="coff-matrix-source">
+<coff-matrice-primaire>
+  <golem-motor type="Cognitif" etat="true" polarite="Positive">
+    <coff-css id="T-CSS">
+      <coff-js id="T-JS">
+        <python-coff-node id="T-PYTHON">
+          <jnode-audio id="T-AUDIO">
+            <transistor-touch id="T-TOUCH">
+              <transistor-co id="T-CO">
+
+<co id="🎨-c1" target="T-CSS">[[
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background-color: #050508;
+    margin: 0;
+    padding: 12px;
+    overflow: hidden;
+    touch-action: manipulation;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    height: 100dvh;
+    gap: 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: monospace;
+  }
+
+  .banniere-logo {
+    color: #00FFFF;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px #00FFFF, 0 0 30px #00FFFF, 0 0 50px #FF00FF;
+    cursor: pointer;
+    text-align: center;
+    z-index: 10;
+    transition: transform 0.1s ease;
+  }
+  .banniere-logo:active {
+    transform: scale(0.96);
+  }
+
+  /* HUD Moniteur GoleMotor */
+  .golemotor-hud {
+    background: rgba(10, 15, 25, 0.85);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #A0C0D0;
+  }
+  .hud-val {
+    font-weight: bold;
+    color: #00FFFF;
+    text-shadow: 0 0 8px #00FFFF;
+  }
+  .hud-val.active { color: #00FF66; text-shadow: 0 0 8px #00FF66; }
+  .hud-val.passive { color: #FFCC00; text-shadow: 0 0 8px #FFCC00; }
+  .hud-val.dormant { color: #CC66FF; text-shadow: 0 0 8px #CC66FF; }
+  .hud-val.zombie { color: #FF3366; text-shadow: 0 0 8px #FF3366; }
+
+  /* Boutons d'appel direct GoleMotor */
+  .actions-grid {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+    z-index: 10;
+  }
+  .btn-action {
+    flex: 1;
+    background: rgba(0, 255, 255, 0.08);
+    border: 1px solid #00FFFF;
+    color: #00FFFF;
+    padding: 12px 8px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .btn-action:hover {
+    background: rgba(0, 255, 255, 0.25);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+  .btn-action:active {
+    background: #00FFFF;
+    color: #000;
+  }
+
+  .particule {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99;
+  }
+]]</co>
+
+<co id="🔲-h1" target="T-CO">[[
+  <div class="banniere-logo" id="logo-universe" onclick="window.GoleMotor.call('PULSE_HARMONIC')">HELLO UNIVERSE</div>
+
+  <div class="golemotor-hud" id="golemotor-monitor">
+    <div class="hud-row"><span>GOLEMOTOR ENGINE:</span><span class="hud-val active">ONLINE</span></div>
+    <div class="hud-row"><span>DERNIER APPEL:</span><span class="hud-val" id="hud-last-call">STANDBY</span></div>
+    <div class="hud-row"><span>POLARITÉ:</span><span class="hud-val" id="hud-polarity">+ POSITIVE</span></div>
+    <div class="hud-row"><span>FLUX TYPE / ÉTAT:</span><span class="hud-val active" id="hud-state">APP :: ACTIVE</span></div>
+  </div>
+
+  <div class="actions-grid">
+    <button class="btn-action" onclick="window.GoleMotor.call('REZ_FLASH')">⚡ REZ FLASH</button>
+    <button class="btn-action" onclick="window.GoleMotor.call('CYCLE_PURGE')">🌀 MUTATION</button>
+    <button class="btn-action" onclick="window.GoleMotor.call('PURGE_ZOMBIE')">🔴 PURGE 0%</button>
+  </div>
+]]</co>
+
+<co id="🎵-a1" target="T-AUDIO">[[
+  window.audioCtx = null;
+
+  window.jouerSonPulsatif = function(frequenceBase = 220, typeOnde = 'sawtooth') {
+    try {
+      if (!window.audioCtx) {
+        window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+
+      const now = window.audioCtx.currentTime;
+      const duree = 0.4;
+      const masterGain = window.audioCtx.createGain();
+
+      masterGain.gain.setValueAtTime(0.22, now);
+      masterGain.gain.exponentialRampToValueAtTime(0.0001, now + duree);
+      masterGain.connect(window.audioCtx.destination);
+
+      // Tri-oscillateur polyphonique
+      [1.0, 1.25, 1.50].forEach((ratio, idx) => {
+        const osc = window.audioCtx.createOscillator();
+        osc.type = typeOnde;
+        osc.frequency.setValueAtTime(frequenceBase * ratio, now);
+        osc.detune.setValueAtTime((Math.random() - 0.5) * 10, now);
+        osc.connect(masterGain);
+        osc.start(now);
+        osc.stop(now + duree);
+      });
+    } catch (e) {
+      console.warn("[AUDIO COFF] Standby :", e);
+    }
+  };
+]]</co>
+
+<co id="⚡-p1" target="T-PYTHON">[[
+  /*
+  =============================================================================
+   GOLEMOTOR KERNEL NATIVE JAVASCRIPT / PYTHON COFF BRIDGE
+  =============================================================================
+  */
+
+  const EntityType = {
+    APP: "APP",
+    GAME: "GAME",
+    VIDEO: "VIDEO",
+    IMAGE: "IMAGE",
+    AUDIO: "AUDIO",
+    FOLDER: "FOLDER",
+    FILE: "FILE",
+    NOTE: "NOTE",
+    SEED: "COFF_SEED"
+  };
+
+  const Polarity = {
+    POSITIVE: "+ POSITIVE",   // Expansion / Rendu / Paste
+    NEGATIVE: "- NÉGATIVE",   // Compression / Purge / Suppr
+    ABSTRACT: "~ ABSTRAITE"   // Mutation de type en cours de purge
+  };
+
+  const DataState = {
+    ACTIVE: "ACTIVE (In-Use)",
+    PASSIVE: "PASSIVE (Background)",
+    DORMANT: "DORMANT (Mattern Buffer)",
+    ZOMBIE: "ZOMBIE (Cold 0% RAM)"
+  };
+
+  class GoleMotorRuntime {
+    constructor() {
+      this.currentType = EntityType.APP;
+      this.currentState = DataState.ACTIVE;
+      this.currentPolarity = Polarity.POSITIVE;
+      this.memoryEntities = new Map();
+      this.initDefaultEntities();
+    }
+
+    initDefaultEntities() {
+      this.register("UNIVERSE_CORE", EntityType.APP, "<co id='🔲-h1'>[[ core ]]</co>");
+    }
+
+    register(id, type, matternSeed) {
+      this.memoryEntities.set(id, {
+        id: id,
+        originalType: type,
+        currentType: type,
+        state: DataState.ACTIVE,
+        polarity: Polarity.POSITIVE,
+        seed: matternSeed,
+        ramAllocated: 64
+      });
+    }
+
+    // POINT D'ENTRÉE PRINCIPAL APPELABLE PAR LE HTML
+    call(action, payload = {}) {
+      console.log(`⚡ [GoleMotor.call] Ordre reçu du HTML : ${action}`);
+      const lastCallLabel = document.getElementById('hud-last-call');
+      const polarityLabel = document.getElementById('hud-polarity');
+      const stateLabel = document.getElementById('hud-state');
+
+      if (lastCallLabel) lastCallLabel.textContent = action;
+
+      switch(action) {
+        case 'REZ_FLASH':
+          // REZ from Zombie vers Actif (Polarité Positive)
+          this.currentPolarity = Polarity.POSITIVE;
+          this.currentState = DataState.ACTIVE;
+          this.currentType = EntityType.GAME;
+          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(440, 'sawtooth');
+          break;
+
+        case 'CYCLE_PURGE':
+          // Mutation polymorphe vers Passif / Dormant (Polarité Abstraite)
+          this.currentPolarity = Polarity.ABSTRACT;
+          if (this.currentType === EntityType.GAME) {
+            this.currentType = EntityType.VIDEO;
+            this.currentState = DataState.PASSIVE;
+          } else if (this.currentType === EntityType.VIDEO) {
+            this.currentType = EntityType.NOTE;
+            this.currentState = DataState.DORMANT;
+            this.currentPolarity = Polarity.NEGATIVE;
+          } else {
+            this.currentType = EntityType.APP;
+            this.currentState = DataState.ACTIVE;
+            this.currentPolarity = Polarity.POSITIVE;
+          }
+          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(330, 'triangle');
+          break;
+
+        case 'PURGE_ZOMBIE':
+          // Purge totale (Suppr) : RAM = 0, Pointeur seul (Polarité Négative)
+          this.currentPolarity = Polarity.NEGATIVE;
+          this.currentState = DataState.ZOMBIE;
+          this.currentType = EntityType.SEED;
+          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(140, 'sine');
+          break;
+
+        case 'PULSE_HARMONIC':
+        default:
+          this.currentPolarity = Polarity.POSITIVE;
+          if (typeof window.jouerSonPulsatif === 'function') window.jouerSonPulsatif(260 + Math.random() * 200, 'sawtooth');
+          break;
+      }
+
+      // Mise à jour de l'affichage HUD
+      if (polarityLabel) polarityLabel.textContent = this.currentPolarity;
+      if (stateLabel) {
+        stateLabel.textContent = `${this.currentType} :: ${this.currentState}`;
+        stateLabel.className = 'hud-val ' + (
+          this.currentState.includes('ACTIVE') ? 'active' :
+          this.currentState.includes('PASSIVE') ? 'passive' :
+          this.currentState.includes('DORMANT') ? 'dormant' : 'zombie'
+        );
+      }
+
+      // Déclenchement de particules au clic sur l'action
+      if (typeof window.declencherParticules === 'function') {
+        window.declencherParticules();
+      }
+
+      return {
+        action: action,
+        type: this.currentType,
+        state: this.currentState,
+        polarity: this.currentPolarity
+      };
+    }
+  }
+
+  // Instanciation de l'objet global
+  window.GoleMotor = new GoleMotorRuntime();
+  console.log("[SUPER S.A.M. KERNEL] GoleMotor est prêt et raccordé à window.GoleMotor.");
+]]</co>
+
+<co id="👆-t1" target="T-TOUCH">[[
+  window.declencherParticules = function(x, y) {
+    if (x === undefined || y === undefined) {
+      x = window.innerWidth / 2;
+      y = window.innerHeight / 2;
+    }
+
+    const palette = ['#00FFFF', '#FF00FF', '#00FF66', '#FFCC00', '#FFFFFF'];
+    for (let i = 0; i < 35; i++) {
+      const p = document.createElement('div');
+      p.className = 'particule';
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      p.style.backgroundColor = c;
+      p.style.boxShadow = `0 0 12px ${c}, 0 0 24px ${c}`;
+      p.style.width = '5px';
+      p.style.height = '5px';
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      document.body.appendChild(p);
+
+      const angle = Math.random() * Math.PI * 2;
+      const force = 50 + Math.random() * 160;
+      const tx = Math.cos(angle) * force;
+      const ty = Math.sin(angle) * force;
+
+      p.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+      ], {
+        duration: 400 + Math.random() * 300,
+        easing: 'cubic-bezier(0, .9, .57, 1)'
+      }).onfinish = () => p.remove();
+    }
+  };
+
+  // Clic sur l'arrière-plan global
+  window.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('.actions-grid') && !e.target.closest('.golemotor-hud') && !e.target.closest('.banniere-logo')) {
+      window.GoleMotor.call('PULSE_HARMONIC');
+      window.declencherParticules(e.clientX, e.clientY);
+    }
+  });
+]]</co>
+
+              </transistor-co>
+            </transistor-touch>
+          </jnode-audio>
+        </python-coff-node>
+      </coff-js>
+    </coff-css>
+  </golem-motor>
+</coff-matrice-primaire>
+</script>
+
+</body>
+</html>
