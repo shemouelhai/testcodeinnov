@@ -45,7 +45,7 @@
                 document.body.insertAdjacentHTML('beforeend', html);
             }
 
-            // 3. Activation Noyau Audio (JNode)
+            // 3. Activation Noyau Audio Polyphonique (JNode)
             if (audioJs) {
                 const audioScript = document.createElement('script');
                 audioScript.textContent = audioJs;
@@ -156,22 +156,42 @@
                                                 window.audioCtx.resume();
                                             }
 
-                                            const osc = window.audioCtx.createOscillator();
-                                            const gain = window.audioCtx.createGain();
+                                            const now = window.audioCtx.currentTime;
+                                            const duree = 0.45;
 
-                                            osc.type = 'sawtooth';
-                                            // Fréquence aléatoire cybernétique
-                                            osc.frequency.setValueAtTime(300 + Math.random() * 600, window.audioCtx.currentTime);
-                                            osc.frequency.exponentialRampToValueAtTime(100, window.audioCtx.currentTime + 0.25);
+                                            // Grilles d'accords harmoniques (Mineur, Majeur, Sus4, Octave)
+                                            const grillesAccords = [
+                                                [1.0, 1.20, 1.50],   // Accord Mineur spatial
+                                                [1.0, 1.25, 1.50],   // Accord Majeur brillant
+                                                [1.0, 1.334, 1.50],  // Accord Sus4 cybernétique
+                                                [1.0, 1.50, 2.00]    // Power Chord étendu
+                                            ];
 
-                                            gain.gain.setValueAtTime(0.3, window.audioCtx.currentTime);
-                                            gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.25);
+                                            const accord = grillesAccords[Math.floor(Math.random() * grillesAccords.length)];
+                                            const fondamentale = 180 + Math.random() * 200;
+                                            const textures = ['sawtooth', 'triangle', 'sine'];
 
-                                            osc.connect(gain);
-                                            gain.connect(window.audioCtx.destination);
+                                            // Bus Master Gain avec atténuation exponentielle
+                                            const masterGain = window.audioCtx.createGain();
+                                            masterGain.gain.setValueAtTime(0.25, now);
+                                            masterGain.gain.exponentialRampToValueAtTime(0.0001, now + duree);
+                                            masterGain.connect(window.audioCtx.destination);
 
-                                            osc.start();
-                                            osc.stop(window.audioCtx.currentTime + 0.25);
+                                            // Tri-oscillateur avec micro-détuning analogique
+                                            accord.forEach((ratio, index) => {
+                                                const osc = window.audioCtx.createOscillator();
+                                                const detuneCents = (Math.random() - 0.5) * 12;
+
+                                                osc.type = textures[index % textures.length];
+                                                osc.frequency.setValueAtTime(fondamentale * ratio, now);
+                                                osc.detune.setValueAtTime(detuneCents, now);
+                                                osc.frequency.exponentialRampToValueAtTime(fondamentale * ratio * 0.96, now + duree);
+
+                                                osc.connect(masterGain);
+                                                osc.start(now);
+                                                osc.stop(now + duree);
+                                            });
+
                                         } catch (e) {
                                             console.warn("[AUDIO COFF] En attente de déblocage :", e);
                                         }
@@ -180,12 +200,10 @@
 
                                 <co id="👆-t1" target="T-TOUCH">[[
                                     window.declencherActionTotale = function(e) {
-                                        // Déblocage et déclenchement audio
                                         if (typeof window.jouerSonPulsatif === 'function') {
                                             window.jouerSonPulsatif();
                                         }
 
-                                        // Récupération des coordonnées tactiles ou curseur
                                         let x = e.clientX;
                                         let y = e.clientY;
 
@@ -197,7 +215,6 @@
                                             y = window.innerHeight / 2;
                                         }
 
-                                        // Émission des particules néon
                                         const palette = ['#FF0055', '#00FFCC', '#FFFF00', '#FF00FF', '#00FFFF', '#7000FF', '#FFFFFF'];
                                         for (let i = 0; i < 45; i++) {
                                             const p = document.createElement('div');
@@ -226,7 +243,6 @@
                                         }
                                     };
 
-                                    // Écouteur global sur toute la fenêtre
                                     window.addEventListener('pointerdown', (e) => {
                                         window.declencherActionTotale(e);
                                     });
@@ -254,3 +270,4 @@
 
 </body>
 </html>
+
